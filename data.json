@@ -1,0 +1,69 @@
+{
+  "categories": [
+    { "id": "living", "name": "living", "color": "#5D6D97" },
+    { "id": "subscription", "name": "subscription", "color": "#1B2A41" },
+    { "id": "shopping", "name": "shopping", "color": "#4A4A4A" },
+    { "id": "food", "name": "food", "color": "#D46A7E" },
+    { "id": "transport", "name": "transport", "color": "#F8B333" },
+    { "id": "medical", "name": "medical", "color": "#4F8F86" },
+    { "id": "etc", "name": "etc", "color": "#F5F5F5" }
+  ],
+  "transactions": [
+    {
+      "id": "2026-03-31",
+      "category": "living",
+      "memo": "배고파서 빵사먹음",
+      "price": 13000,
+      "type": "expense",
+      "place": "연세대학교 학생회관",
+      "location": { "lat": 37.564, "lng": 126.939 },
+      "product": ["초코빵", "라이터", "고오스빵"]
+    }
+  ],
+  "monthlyCashflow": [
+    {
+      "yearMonth": "2026-03",
+      "totalSpend": 1600000,
+      "totalIncome": 3000000,
+      "totalCashflow": 1400000,
+      "aiSummary": "",
+      "spendingAnalysis": [
+        {
+          "categoryId": "living",
+          "totalAmount": 800000,
+          "percentage": 50
+        },
+        {
+          "categoryId": "subscription",
+          "totalAmount": 50000,
+          "percentage": 3.125
+        },
+        {
+          "categoryId": "shopping",
+          "totalAmount": 300000,
+          "percentage": 18.75
+        },
+        {
+          "categoryId": "food",
+          "totalAmount": 200000,
+          "percentage": 12.5
+        },
+        {
+          "categoryId": "transport",
+          "totalAmount": 100000,
+          "percentage": 6.25
+        },
+        {
+          "categoryId": "medical",
+          "totalAmount": 100000,
+          "percentage": 6.25
+        },
+        {
+          "categoryId": "etc",
+          "totalAmount": 50000,
+          "percentage": 3.125
+        }
+      ]
+    }
+  ]
+}
