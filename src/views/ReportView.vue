@@ -210,7 +210,7 @@ let isViewActive = true;
 
 onMounted(async () => {
   try {
-    // 지금은 data.json 기반 목업 데이터를 가져오고, 나중에는 이 호출만 실제 API로 바꿈
+    // 지금은 data2.json 기반 목업 데이터를 가져오고, 나중에는 이 호출만 실제 API로 바꾸면 됩니다.
     const data = await getReportData();
 
     if (!isViewActive) {

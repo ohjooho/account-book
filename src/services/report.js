@@ -1,4 +1,4 @@
-import sourceData from '../../data.json';
+import sourceData from '../../data2.json';
 
 // 실제 AI 연동 시에는 이 프롬프트를 그대로 API 요청 본문에 사용할 수 있습니다.
 export const REPORT_PROMPTS = {
@@ -57,8 +57,7 @@ export async function getReportData({ simulateDelay = true } = {}) {
     await delay(MOCK_DELAY_MS);
   }
 
-  const latestCashflow =
-    sourceData.monthlyCashflow[sourceData.monthlyCashflow.length - 1];
+  const latestCashflow = getTargetMonthlyCashflow();
 
   const categoryMap = Object.fromEntries(
     sourceData.categories.map((category) => [category.id, category]),
@@ -76,8 +75,7 @@ export async function getReportData({ simulateDelay = true } = {}) {
       return {
         ...item,
         color: category?.color ?? '#999999',
-        label:
-          CATEGORY_LABEL_MAP[item.categoryId] ?? category?.name ?? item.categoryId,
+        label: getCategoryLabel(category, item.categoryId),
         share,
       };
     })
@@ -189,4 +187,28 @@ function formatCurrency(value) {
 function formatMonth(yearMonth) {
   const [year, month] = yearMonth.split('-');
   return `${year}년 ${Number(month)}월`;
+}
+
+function getTargetMonthlyCashflow() {
+  // data2.json은 meta에 현재 리포트 대상 월 정보를 함께 들고 있으므로 이를 우선 사용합니다.
+  const targetYearMonth =
+    sourceData.meta?.latestMonthInProgress ??
+    sourceData.meta?.latestClosedMonth ??
+    null;
+
+  if (targetYearMonth) {
+    const matchedCashflow = sourceData.monthlyCashflow.find(
+      (item) => item.yearMonth === targetYearMonth,
+    );
+
+    if (matchedCashflow) {
+      return matchedCashflow;
+    }
+  }
+
+  return sourceData.monthlyCashflow[sourceData.monthlyCashflow.length - 1];
+}
+
+function getCategoryLabel(category, categoryId) {
+  return category?.labelKo ?? CATEGORY_LABEL_MAP[categoryId] ?? category?.name ?? categoryId;
 }
