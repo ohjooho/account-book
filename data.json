@@ -1,5 +1,6 @@
 {
   "categories": [
+    { "id": "income", "name": "income", "color": "#A3CB38" },
     { "id": "living", "name": "living", "color": "#5D6D97" },
     { "id": "subscription", "name": "subscription", "color": "#1B2A41" },
     { "id": "shopping", "name": "shopping", "color": "#4A4A4A" },
