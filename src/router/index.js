@@ -32,9 +32,9 @@ const routes = [
     ],
   },
   {
-    // analysis-001: 월별 분석
+    // monthly-001: 월별 분석
     path: '/monthly',
-    name: 'analysis',
+    name: 'monthly',
     component: () => import('@/views/AnalysisView.vue'),
   },
   {
@@ -49,7 +49,7 @@ const routes = [
       },
       // receipt-002
       {
-        path: ':receiptId',
+        path: ':id',
         name: 'receipt-confirm',
         component: () => import('@/views/receipt/ReceiptConfirmView.vue'),
       },
