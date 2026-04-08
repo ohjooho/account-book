@@ -34,7 +34,7 @@ const routes = [
   {
     // analysis-001: 월별 분석
     path: '/monthly',
-    name: 'analysis',
+    name: 'monthly',
     component: () => import('@/views/AnalysisView.vue'),
   },
   {
