@@ -70,6 +70,10 @@
       "aiSummary": "3월 소비 분석 결과입니다",
       "spendingAnalysis": [
         {
+          "categoryId": "income",
+          "totalAmount": "3000000"
+        },
+        {
           "categoryId": "living",
           "totalAmount": 800000,
           "percentage": 50
