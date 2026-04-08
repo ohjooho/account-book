@@ -31,7 +31,7 @@
       "type": "expense",
       "place": "스타벅스 강남역점",
       "location": { "lat": 37.4979, "lng": 127.0276 },
-      "product": ["카페라떼", "샌드위치"],
+      "products": ["카페라떼", "샌드위치"],
       "receiptId": 1744162999999
     }
   ],
@@ -57,7 +57,7 @@
       "type": "expense",
       "place": "스타벅스 강남역점",
       "location": { "lat": 37.4979, "lng": 127.0276 },
-      "product": ["카페라떼", "샌드위치"]
+      "products": ["카페라떼", "샌드위치"]
     }
   },
 
@@ -71,7 +71,7 @@
       "spendingAnalysis": [
         {
           "categoryId": "income",
-          "totalAmount": "3000000"
+          "totalAmount": 3000000
         },
         {
           "categoryId": "living",

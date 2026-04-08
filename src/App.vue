@@ -1,21 +1,49 @@
 <template>
-  <div class="app-container">
-    <header class="app-header">
-      <div class="logo" @click="$router.push('/')">가계부</div>
-      <div class="user-profile">대충사람머리아이콘</div>
+  <div class="account-viewport">
+    <header class="account-header">
+      <div class="header-content">
+        <div class="logo-area">
+          <img
+            :src="getAssetUrl('Book.png')"
+            alt="가계부"
+            class="header-logo"
+          />
+          <h1 class="header-title">가계부</h1>
+        </div>
+        <img
+          :src="getAssetUrl('account_circle.png')"
+          alt="프로필"
+          class="profile-icon"
+        />
+      </div>
     </header>
 
-    <div class="main-wrapper">
-      <nav class="side-menu">
-        <ul>
-          <li @click="$router.push('/')">대시보드</li>
-          <li @click="$router.push('/transactions')">거래 내역</li>
-          <li @click="$router.push('/receipt')">AI 영수증 등록</li>
-          <li @click="$router.push('/monthly')">월별 분석</li>
-          <li @click="$router.push('/report')">AI 리포트</li>
-          <li @click="$router.push('/map')">소비 지도</li>
-        </ul>
-      </nav>
+    <div class="main-body">
+      <aside class="sidebar">
+        <nav class="menu-list">
+          <router-link
+            v-for="menu in menuItems"
+            :key="menu.name"
+            :to="menu.path"
+            class="menu-item"
+            v-slot="{ isActive }"
+            @mouseenter="hoveredMenu = menu.name"
+            @mouseleave="hoveredMenu = null"
+          >
+            <img
+              :src="
+                getMenuIcon(
+                  menu.iconBase,
+                  isActive || hoveredMenu === menu.name,
+                )
+              "
+              :alt="menu.label"
+              class="menu-icon"
+            />
+            <span class="menu-label">{{ menu.label }}</span>
+          </router-link>
+        </nav>
+      </aside>
 
       <main class="content-area">
         <router-view />
@@ -24,62 +52,182 @@
   </div>
 </template>
 
+<script setup>
+import { ref } from 'vue';
+
+const hoveredMenu = ref(null);
+
+const menuItems = [
+  { name: 'Dashboard', label: '대시보드', path: '/', iconBase: 'Setting_vert' },
+  {
+    name: 'Transactions',
+    label: '거래 내역',
+    path: '/transactions',
+    iconBase: 'transactions',
+  },
+  {
+    name: 'Receipt',
+    label: 'AI 영수증 스캔',
+    path: '/receipt',
+    iconBase: 'receipt',
+  },
+  {
+    name: 'Monthly',
+    label: '월별 요약',
+    path: '/monthly',
+    iconBase: 'calendar',
+  },
+  {
+    name: 'Report',
+    label: 'AI 소비 분석',
+    path: '/report',
+    iconBase: 'report',
+  },
+  { name: 'Map', label: '소비 지도', path: '/map', iconBase: 'map' },
+];
+
+const getAssetUrl = (fileName) => {
+  return new URL(`./assets/${fileName}`, import.meta.url).href;
+};
+
+/**
+ * @param isHighlighted
+ */
+const getMenuIcon = (baseName, isHighlighted) => {
+  const colorSuffix = isHighlighted ? '_black.png' : '_white.png';
+  return new URL(`./assets/${baseName}${colorSuffix}`, import.meta.url).href;
+};
+</script>
+
 <style scoped>
-.app-container {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid lightgray;
-  height: 100vh;
+:root {
+  --header-height: 80px;
+  --sidebar-width: 300px;
 }
 
-.app-header {
-  height: 70px;
-  background-color: white;
-  color: black;
-  border-bottom: 1px solid lightgray;
+.account-viewport {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f7;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.account-header {
+  height: var(--header-height);
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #eaeaea;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-content {
+  width: 100%;
+  max-width: 1920px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  font-size: 26px;
-  font-weight: bold;
+  padding: 0 50px;
+  box-sizing: border-box;
 }
 
-.main-wrapper {
+.logo-area {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  width: 28px;
+  margin-right: 15px;
+}
+
+.header-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.profile-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.main-body {
   display: flex;
   flex: 1;
-  overflow: hidden;
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
 }
 
-.side-menu {
-  width: 200px;
+.sidebar {
+  width: var(--sidebar-width);
   background-color: #292929;
-  border-right: 1px solid #292929;
-  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+  z-index: 100;
 }
 
-.side-menu ul {
-  list-style: none;
-  color: white;
-  font-size: 20px;
-  font-weight: 600;
-  padding: 0;
+.menu-list {
+  display: flex;
+  flex-direction: column;
 }
 
-.side-menu li {
-  padding: 15px 20px;
+.menu-item {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  color: #ffffff;
+  font-size: 22px;
+  text-decoration: none;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
-.side-menu li:hover {
-  background-color: #e0e0e0;
-  color: #292929;
+.menu-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 20px;
+}
+
+.menu-item:hover,
+.router-link-exact-active {
+  background-color: #ffffff;
+  color: #000000;
+  font-weight: 600;
 }
 
 .content-area {
   flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+  padding: 40px;
+  background-color: #f5f5f7;
+}
+
+@media (max-width: 1024px) {
+  .header-content {
+    padding: 0 30px;
+  }
+  .sidebar {
+    width: 250px;
+  }
+  .menu-item {
+    font-size: 18px;
+    padding: 0 25px;
+  }
 }
 </style>
