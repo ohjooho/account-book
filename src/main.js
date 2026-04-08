@@ -1,4 +1,3 @@
-//main.js
 import './assets/main.css';
 
 import { createApp } from 'vue';
@@ -24,7 +23,7 @@ const vuetify = createVuetify({
 });
 
 const app = createApp(App);
-app.component('FontAwesomeIcon', FontAwesomeIcon);
+app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(createPinia());
 app.use(router);
 app.use(vuetify);
