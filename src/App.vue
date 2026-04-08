@@ -28,17 +28,21 @@
 .app-container {
   display: flex;
   flex-direction: column;
+  border: 1px solid lightgray;
   height: 100vh;
 }
 
 .app-header {
-  height: 60px;
-  background-color: #292929;
-  color: white;
+  height: 70px;
+  background-color: white;
+  color: black;
+  border-bottom: 1px solid lightgray;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
+  font-size: 26px;
+  font-weight: bold;
 }
 
 .main-wrapper {
@@ -49,13 +53,16 @@
 
 .side-menu {
   width: 200px;
-  background-color: #f5f5f5;
-  border-right: 1px solid #ddd;
+  background-color: #292929;
+  border-right: 1px solid #292929;
   padding: 20px 0;
 }
 
 .side-menu ul {
   list-style: none;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
   padding: 0;
 }
 
@@ -67,6 +74,7 @@
 
 .side-menu li:hover {
   background-color: #e0e0e0;
+  color: #292929;
 }
 
 .content-area {

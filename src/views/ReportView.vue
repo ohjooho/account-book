@@ -1,6 +1,6 @@
 <template>
     <div>
-
+        <h1>ai report</h1>
     </div>
 </template>
 
