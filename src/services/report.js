@@ -10,7 +10,6 @@ export const REPORT_PROMPTS = {
     '이번 달 소비 패턴과 절약 제안을 반영했을 때 다음 달 지출이 어떻게 달라질지 예측해줘. 예상 총지출과 주요 변화 요인을 설명하고, 사용자가 바로 이해할 수 있도록 간단하고 자연스러운 문장으로 정리해줘.',
 };
 
-// 화면에는 프롬프트 대신 더 자연스러운 안내 문구만 보여주기 위해 분리해둡니다.
 export const REPORT_UI_DESCRIPTIONS = {
   overview: '이번 달 소비가 어디에 집중됐는지 보기 쉽게 정리했어요.',
   savings: '절약 효과가 큰 항목부터 실천 방법과 함께 살펴볼 수 있어요.',
@@ -52,8 +51,8 @@ const MOCK_DELAY_MS = 2000;
 
 export async function getReportData({ simulateDelay = true } = {}) {
   if (simulateDelay) {
-    // 테스트용 2초 지연입니다.
-    // 실제 AI 연동 후에는 이 지연을 제거하고, AI 응답이 끝날 때까지 기다리면 됩니다.
+    // 테스트용 2초 지연
+    // 실제 AI 연동 후에는 이 지연을 제거
     await delay(MOCK_DELAY_MS);
   }
 
@@ -63,7 +62,6 @@ export async function getReportData({ simulateDelay = true } = {}) {
     sourceData.categories.map((category) => [category.id, category]),
   );
 
-  // 첫 번째 카드용 도넛 차트 데이터와 hover용 각도 정보를 함께 계산합니다.
   const expenseCategories = latestCashflow.spendingAnalysis
     .filter((item) => item.categoryId !== 'income' && item.totalAmount > 0)
     .map((item) => {
@@ -111,7 +109,6 @@ export async function getReportData({ simulateDelay = true } = {}) {
     `${subscriptionCategory.label}처럼 반복 결제가 발생하는 항목은 금액이 크지 않아도 누적되기 쉬워서 따로 관리하는 게 좋아요.`,
   ];
 
-  // 두 번째 카드 막대 그래프가 상대적인 크기로 보이도록 최대 절약 금액을 기준으로 잡습니다.
   const maxSavingsAmount = Math.max(
     ...expenseCategories.map(
       (item) => item.totalAmount * (SAVINGS_RATE_MAP[item.categoryId] ?? 0.1),
@@ -138,7 +135,6 @@ export async function getReportData({ simulateDelay = true } = {}) {
     .sort((left, right) => right.expectedSavings - left.expectedSavings)
     .slice(0, 4);
 
-  // 다음 달 예측은 "전부 절약 성공"이 아니라 일부만 현실적으로 반영된다고 가정합니다.
   const realisticSavings = Math.round(
     savingsRecommendations.reduce((sum, item) => sum + item.expectedSavings, 0) *
       0.65,
@@ -190,7 +186,6 @@ function formatMonth(yearMonth) {
 }
 
 function getTargetMonthlyCashflow() {
-  // data2.json은 meta에 현재 리포트 대상 월 정보를 함께 들고 있으므로 이를 우선 사용합니다.
   const targetYearMonth =
     sourceData.meta?.latestMonthInProgress ??
     sourceData.meta?.latestClosedMonth ??
