@@ -151,7 +151,7 @@ const goBack = () => {
   router.push('/transactions');
 };
 
-// 저장 버튼 (일단 로그만)
+// 저장 버튼
 const handleSave = async () => {
   // 유효성 검사
 
@@ -179,6 +179,12 @@ const handleSave = async () => {
     return;
   }
 
+  // 지출일 때는 품목도 필수
+  if (form.value.type === 'expense' && !form.value.products) {
+    alert('품목을 입력해주세요.');
+    return;
+  }
+
   // ===== 데이터 가공 =====
   const newTransaction = {
     type: form.value.type,
@@ -187,9 +193,18 @@ const handleSave = async () => {
     categoryId: form.value.type === 'income' ? 'income' : form.value.categoryId,
     memo: form.value.memo,
     place: form.value.place,
+    // 수입일 때 저장 안되게 할 경우
+    // place: form.value.type === 'income' ? '' : form.value.place,
     products: form.value.products
       ? form.value.products.split(',').map((p) => p.trim())
       : [],
+    // 수입일 때 저장 안되게 할 경우
+    // products:
+    //   form.value.type === 'income'
+    //     ? []
+    //     : form.value.products
+    //       ? form.value.products.split(',').map((p) => p.trim())
+    //       : [],
     location: null,
     receiptId: null,
   };
@@ -260,7 +275,7 @@ const handleSave = async () => {
 }
 
 .form-input:focus {
-  border-color: #4a6fa5;
+  border-color: #5d6d97;
 }
 
 /* ===== 수입/지출 토글 버튼 ===== */
@@ -286,9 +301,9 @@ const handleSave = async () => {
 }
 
 .toggle-btn.active {
-  background-color: #4a6fa5;
+  background-color: #5d6d97;
   color: #ffffff;
-  border-color: #4a6fa5;
+  border-color: #5d6d97;
 }
 
 /* ===== 버튼 영역 ===== */
@@ -319,12 +334,12 @@ const handleSave = async () => {
 }
 
 .btn-save {
-  background-color: #4ab19d;
+  background-color: #5d6d97;
   color: #ffffff;
 }
 
 .btn-save:hover {
-  background-color: #3d9788;
+  background-color: #5d6d97;
 }
 
 /* 숫자 입력 필드 스피너 숨기기 */
