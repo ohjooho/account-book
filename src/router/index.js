@@ -32,10 +32,10 @@ const routes = [
     ],
   },
   {
-    // analysis-001: 월별 분석
+    // monthly-001: 월별 분석
     path: '/monthly',
-    name: 'analysis',
-    component: () => import('@/views/AnalysisView.vue'),
+    name: 'monthly',
+    component: () => import('@/views/MonthlySummaryView.vue'),
   },
   {
     // receipt-001, 002: AI 영수증 첨부 및 등록
@@ -49,7 +49,7 @@ const routes = [
       },
       // receipt-002
       {
-        path: ':receiptId',
+        path: ':id',
         name: 'receipt-confirm',
         component: () => import('@/views/receipt/ReceiptConfirmView.vue'),
       },

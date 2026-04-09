@@ -1,0 +1,4 @@
+/* 스크롤바 공간 확보 */
+html {
+  scrollbar-gutter: stable;
+}
