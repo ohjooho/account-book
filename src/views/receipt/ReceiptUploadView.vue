@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <div class="receiptArea">
-      <font-awesome-icon icon="fa-solid fa-receipt" class="receiptImage" />
+    <div class="receipt-area">
+      <font-awesome-icon icon="fa-solid fa-receipt" class="receipt-image" />
       <input
         ref="fileInput"
         type="file"
@@ -9,9 +9,19 @@
         style="display: none"
         @change="handleFileChange"
       />
-      <button class="receiptButton" @click="openFilePicker" :disabled="loading">
-        {{ loading ? '분석 중...' : '영수증 첨부' }}
+      <button
+        class="receipt-button"
+        @click="openFilePicker"
+        :disabled="loading"
+      >
+        영수증 첨부
       </button>
+    </div>
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">영수증 분석 중...</p>
+      </div>
     </div>
   </div>
 </template>
@@ -21,6 +31,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useReceiptStore } from '@/stores/receipt';
+import { getLocationByPlace } from '@/utils/kakaoMap';
 
 const router = useRouter();
 const receiptStore = useReceiptStore();
@@ -28,9 +39,11 @@ const fileInput = ref(null);
 const loading = ref(false);
 
 const openFilePicker = () => {
+  if (loading.value) return;
   fileInput.value?.click();
 };
 
+// AI 서버로 보내기 위한 파일 -> 문자열(base64)작업
 const fileToBase64 = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -49,80 +62,18 @@ const fileToBase64 = async (file) => {
   });
 };
 
-// 위치 받아오는 kakaoscript
-const loadKakaoScript = () => {
-  return new Promise((resolve, reject) => {
-    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-      resolve();
-      return;
-    }
-
-    const existingScript = document.getElementById('kakao-map-sdk');
-
-    if (existingScript) {
-      existingScript.addEventListener('load', resolve, { once: true });
-      existingScript.addEventListener(
-        'error',
-        () => reject(new Error('Kakao SDK load error')),
-        { once: true },
-      );
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.id = 'kakao-map-sdk';
-
-    const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
-
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`;
-
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Kakao SDK load failed'));
-
-    document.head.appendChild(script);
-  });
-};
-// place를 통해 경도 위도 받아오는 함수
-const getLocationByPlace = async (place) => {
-  if (!place?.trim()) {
-    return { lat: null, lng: null };
-  }
-
-  await loadKakaoScript();
-
-  return new Promise((resolve, reject) => {
-    window.kakao.maps.load(() => {
-      const places = new window.kakao.maps.services.Places();
-
-      places.keywordSearch(place, (data, status) => {
-        if (
-          status === window.kakao.maps.services.Status.OK &&
-          Array.isArray(data) &&
-          data.length > 0
-        ) {
-          resolve({
-            lat: Number(data[0].y),
-            lng: Number(data[0].x),
-          });
-          return;
-        }
-
-        if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
-          resolve({
-            lat: null,
-            lng: null,
-          });
-          return;
-        }
-
-        reject(new Error(`카카오 장소 검색 실패: ${status}`));
-      });
-    });
-  });
-};
 //AI 분석 함수
 const analyzeReceiptWithOpenAI = async (file) => {
-  const { base64, dataUrl } = await fileToBase64(file);
+  const draftId = Number(
+    new Date().toISOString().slice(0, 10).replaceAll('-', '') +
+      String(Date.now()).slice(-4),
+  );
+
+  const uploadedImagePath = await receiptStore.uploadReceiptImage(
+    file,
+    draftId,
+  );
+  const { base64 } = await fileToBase64(file);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   const response = await fetch('https://api.openai.com/v1/responses', {
@@ -183,14 +134,10 @@ const analyzeReceiptWithOpenAI = async (file) => {
   const data = await response.json();
   const text = data.output_text || data.output?.[0]?.content?.[0]?.text || '{}';
   const parsed = JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] || '{}');
-  const draftId = Number(
-    new Date().toISOString().slice(0, 10).replaceAll('-', '') +
-      String(Date.now()).slice(-4),
-  );
   const location = await getLocationByPlace(parsed.place);
   return {
     id: draftId,
-    imageUrl: dataUrl,
+    imageUrl: uploadedImagePath,
     status: 'reviewing',
     ocrRawText: parsed.ocrRawText ?? '',
     aiResult: {
@@ -216,15 +163,15 @@ const handleFileChange = async (event) => {
   loading.value = true;
 
   try {
+    // AI 분석하기
     const draftData = await analyzeReceiptWithOpenAI(file);
-    // Data에 receiptDraft에 저장하기
+    // Data에 분석한 내용 receiptDraft에 저장하기
     const savedDraft = await receiptStore.saveReceiptDraft(draftData);
-    
-    console.log(draftData);
-    router.push(`/receipt/${savedDraft.id}`)
+    // 페이지 이동
+    router.push(`/receipt/${savedDraft.id}`);
   } catch (error) {
     console.error(error);
-    alert('영수증 분석 또는 저장 중 오류가 발생했습니다.');
+    alert('영수증 분석 또는 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
   } finally {
     loading.value = false;
     event.target.value = '';
@@ -241,7 +188,7 @@ const handleFileChange = async (event) => {
   align-items: center;
 }
 
-.receiptArea {
+.receipt-area {
   width: 50%;
   height: 50%;
   display: flex;
@@ -250,7 +197,7 @@ const handleFileChange = async (event) => {
   align-items: center;
 }
 
-.receiptImage {
+.receipt-image {
   width: 50%;
   height: 50%;
   min-width: 120px;
@@ -258,7 +205,7 @@ const handleFileChange = async (event) => {
   color: black;
 }
 
-.receiptButton {
+.receipt-button {
   width: 30%;
   height: 15%;
   min-width: 120px;
@@ -266,5 +213,64 @@ const handleFileChange = async (event) => {
   font-weight: 700;
   background-color: #4e8780;
   border-radius: 17px;
+}
+
+.loading-box {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #333;
+  font-size: 1rem;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(128, 128, 128, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.loading-state {
+  min-height: 220px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 4px solid #e5e7eb;
+  border-top-color: #111827;
+  animation: spin 0.9s linear infinite;
+}
+
+.loading-text {
+  margin: 0;
+  color: #5f6673;
+  font-size: 14px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

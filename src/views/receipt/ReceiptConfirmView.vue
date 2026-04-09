@@ -3,7 +3,7 @@
     <div class="receipt-layout">
       <div class="receipt-image-panel">
         <img
-          :src="receiptDraft.imageUrl"
+          :src="`http://localhost:3001${receiptDraft.imageUrl}`"
           alt="영수증 이미지"
           class="receipt-image"
         />
@@ -12,12 +12,16 @@
       <div class="receipt-form-panel">
         <div class="form-group">
           <label>날짜</label>
-          <input v-model="receiptDraft.aiResult.date" type="text" />
+          <input v-model="receiptDraft.aiResult.date" type="date" />
         </div>
 
         <div class="form-group">
           <label>구매 장소</label>
-          <input v-model="receiptDraft.aiResult.place" type="text" />
+          <input
+            v-model.trim="receiptDraft.aiResult.place"
+            type="text"
+            placeholder="ex) 씨유 세종대후문점"
+          />
         </div>
 
         <div class="form-group">
@@ -25,6 +29,7 @@
           <input
             :value="productsText"
             type="text"
+            placeholder="쉼표(,)로 구분해서 입력해주세요."
             @input="handleProductsInput"
           />
         </div>
@@ -36,17 +41,35 @@
 
         <div class="form-group">
           <label>메모</label>
-          <input v-model="receiptDraft.aiResult.memo" type="text" />
+          <input
+            v-model="receiptDraft.aiResult.memo"
+            placeholder="구매 내용을 입력해주세요."
+            type="text"
+          />
         </div>
 
         <div class="form-group">
           <label>총 가격</label>
-          <input v-model.number="receiptDraft.aiResult.price" type="number" />
+          <input
+            :value="priceInput"
+            type="text"
+            inputmode="numeric"
+            placeholder="숫자만 입력해주세요."
+            @input="handlePriceInput"
+          />
         </div>
-
+        <p v-if="formErrorMessage" class="form-error-message">
+          {{ formErrorMessage }}
+        </p>
         <div class="button-group">
           <button class="cancel-button" @click="goBack">취소하기</button>
-          <button class="submit-button">등록하기</button>
+          <button
+            class="submit-button"
+            :disabled="!isFormValid || isSaving"
+            @click="receiptSave"
+          >
+            {{ isSaving ? '등록 중...' : '등록하기' }}
+          </button>
         </div>
       </div>
     </div>
@@ -59,18 +82,46 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useReceiptStore } from '@/stores/receipt';
+import { getLocationByPlace } from '@/utils/kakaoMap';
 
 const route = useRoute();
 const router = useRouter();
 const receiptStore = useReceiptStore();
 
 const receiptDraft = ref(null);
-
+const isSaving = ref(false);
+const formErrorMessage = ref('');
+// 상품목록
 const productsText = computed(() => {
   if (!receiptDraft.value) return '';
   return receiptDraft.value.aiResult.products.join(', ');
 });
+// 가격
+const priceInput = computed(() => {
+  if (!receiptDraft.value) return '';
+  const value = receiptDraft.value.aiResult.price;
+  return value === null || value === undefined ? '' : String(value);
+});
+const normalizedProducts = computed(() => {
+  if (!receiptDraft.value) return [];
+  return receiptDraft.value.aiResult.products
+    .map((i) => i.trim())
+    .filter(Boolean);
+});
+const isFormValid = computed(() => {
+  if (!receiptDraft.value.aiResult) return false;
 
+  const ai = receiptDraft.value.aiResult;
+  return (
+    !!ai.date &&
+    !!ai.place?.trim() &&
+    !!ai.categoryId?.trim() &&
+    !!ai.memo?.trim() &&
+    normalizedProducts.value.length > 0 &&
+    String(ai.price).trim() !== '' &&
+    Number(ai.price) > 0
+  );
+});
 const handleProductsInput = (event) => {
   if (!receiptDraft.value) return;
 
@@ -80,12 +131,19 @@ const handleProductsInput = (event) => {
     .filter(Boolean);
 };
 
+const handlePriceInput = (event) => {
+  if (!receiptDraft.value) return;
+
+  const onlyNumbers = event.target.value.replace(/[^0-9]/g, '');
+  receiptDraft.value.aiResult.price =
+    onlyNumbers === '' ? '' : Number(onlyNumbers);
+};
+
 const fetchReceiptDraft = async () => {
   try {
-    const receiptId = route.params.receiptId;
     const data = await receiptStore.fetchReceiptDraft();
 
-    if (!data || String(data.id) !== String(receiptId)) {
+    if (!data) {
       throw new Error('잘못된 영수증 초안 접근');
     }
 
@@ -99,6 +157,54 @@ const fetchReceiptDraft = async () => {
 
 const goBack = () => {
   router.push('/receipt');
+};
+
+const receiptSave = async () => {
+  if (!receiptDraft.value) return;
+
+  formErrorMessage.value = '';
+
+  if (!isFormValid.value) {
+    formErrorMessage.value = '모든 항목을 입력해야 등록할 수 있어요.';
+    return;
+  }
+
+  isSaving.value = true;
+
+  try {
+    const ai = receiptDraft.value.aiResult;
+
+    if (!ai.location?.lat || !ai.location?.lng) {
+      const location = await getLocationByPlace(ai.place);
+
+      ai.location = location;
+    }
+    console.log(ai.location);
+    const payload = {
+      ...receiptDraft.value,
+      aiResult: {
+        ...ai,
+        price: Number(ai.price),
+        products: normalizedProducts.value,
+      },
+    };
+    console.log(payload);
+    if (!payload.aiResult.location?.lat || !payload.aiResult.location?.lng) {
+      throw new Error(
+        '구매 장소의 좌표를 찾을 수 없습니다. 다른 장소를 적어주세요.',
+      );
+    }
+    // 데이터 저장
+
+    // 페이지 이동
+
+    // 임시 영수증 삭제
+  } catch (error) {
+    console.error(error);
+    formErrorMessage.value = error.message || '저장 중 오류가 발생했습니다.';
+  } finally {
+    isSaving.value = false;
+  }
 };
 
 onMounted(() => {
@@ -170,6 +276,17 @@ onMounted(() => {
   color: black;
 }
 
+.form-group input::placeholder {
+  color: #9aa0a6;
+}
+
+.form-error-message {
+  margin: 6px 0 0;
+  color: #d9534f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .button-group {
   display: flex;
   justify-content: center;
@@ -196,13 +313,17 @@ onMounted(() => {
   background-color: #4e8780;
 }
 
+.submit-button:disabled {
+  background-color: #9fb9b5;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
 .loading-box {
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #333;
-  font-size: 1rem;
 }
 </style>
