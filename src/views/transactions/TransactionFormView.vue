@@ -152,7 +152,7 @@ const goBack = () => {
 };
 
 // 저장 버튼 (일단 로그만)
-const handleSave = () => {
+const handleSave = async () => {
   // 유효성 검사
 
   // 날짜 필수
@@ -179,8 +179,30 @@ const handleSave = () => {
     return;
   }
 
-  // 모든 검증 통과
-  console.log('저장할 데이터:', form.value);
+  // ===== 데이터 가공 =====
+  const newTransaction = {
+    type: form.value.type,
+    date: form.value.date,
+    price: Number(form.value.price),
+    categoryId: form.value.type === 'income' ? 'income' : form.value.categoryId,
+    memo: form.value.memo,
+    place: form.value.place,
+    products: form.value.products
+      ? form.value.products.split(',').map((p) => p.trim())
+      : [],
+    location: null,
+    receiptId: null,
+  };
+
+  // ===== 저장 및 목록 페이지로 이동 =====
+  try {
+    await transactionsStore.addTransactions(newTransaction);
+    alert('거래가 성공적으로 저장되었습니다.');
+    router.push('/transactions');
+  } catch (e) {
+    alert('저장에 실패했습니다. 다시 시도해주세요.');
+    console.error('저장 에러:', e);
+  }
 };
 </script>
 

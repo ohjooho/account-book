@@ -33,7 +33,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     try {
       const response = await axios.post(BASEURI, {
         ...newTransaction,
-        id: new Date.gettime(),
+        id: new Date().getTime(),
       });
       transactions.value.push(response.data);
     } catch (e) {
