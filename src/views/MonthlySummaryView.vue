@@ -162,56 +162,77 @@ const compareLabel = computed(() => {
   font-weight: bold;
   margin-bottom: 10px;
 }
+
 .monthly-summary-container {
   padding: 20px 10px;
   background: #fff;
   min-height: 100vh;
+  /* 부모 틀 안에서 유연하게 작동하도록 설정 */
+  width: 100%;
+  box-sizing: border-box;
 }
+
 .summary-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap; /* 절대 줄바꿈 금지 */
   gap: 10px;
 }
+
 .month-selector {
   display: flex;
   align-items: center;
   gap: 15px;
   flex-shrink: 0;
 }
+
 .month-selector h2 {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* ⭐ 화살표 버튼 스타일 원복: 테두리 없애고 투명하게 */
 .month-selector button {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 20px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* ⭐ 카드 그리드: 반응형 로직 적용 (3열 유지하되 유연하게) */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
+
 .budget-section {
-  margin-bottom: 10px;  /* 40px → 20px */
+  margin-bottom: 10px;
 }
+
+/* ⭐ 하단 상세 영역: 겹침 방지 반응형 적용 */
 .details-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  /* 평소엔 1.5:1 비율, 좁아지면 자동으로 아래로 */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 40px;
 }
+
 .category-list-area h3 {
   font-size: 18px;
   margin-bottom: 20px;
   font-weight: 700;
 }
+
 .badge {
   background: #eee;
   padding: 2px 8px;
@@ -219,12 +240,14 @@ const compareLabel = computed(() => {
   font-size: 12px;
   margin-right: 8px;
 }
+
 .comparison-picker {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
 }
+
 .comparison-picker button {
   background: #fff;
   border: 1px solid #ddd;
