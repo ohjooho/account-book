@@ -383,8 +383,8 @@ function pickTwoPlaces(list, seed) {
 function generateTransactionsUntilToday() {
   const result = []
   let id = 1
-const now = new Date()
-const startDate = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate())
+  const now = new Date()
+  const startDate = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate())
   const endDate = startOfDay(new Date())
   const categoryOrder = ['food', 'transport', 'shopping', 'etc']
 
@@ -666,10 +666,10 @@ function loadKakaoScript() {
 
     const script = document.createElement('script')
     script.id = 'kakao-map-sdk'
-const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
+    const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
 
-script.src =
-  `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`
+    script.src =
+      `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`
     script.onload = () => resolve()
     script.onerror = () => reject(new Error('Kakao SDK load failed'))
     document.head.appendChild(script)
@@ -717,9 +717,10 @@ onBeforeUnmount(() => {
   font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   width: 100%;
   height: calc(100vh - 88px);
-  min-height: 720px;
   padding: 24px;
   background: #f3f3f5;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .map-toolbar {
@@ -743,7 +744,6 @@ onBeforeUnmount(() => {
   position: relative;
   width: 100%;
   height: calc(100% - 44px);
-  min-height: 640px;
   border-radius: 17px;
   overflow: hidden;
   border: 1px solid #d9d9df;
@@ -753,7 +753,6 @@ onBeforeUnmount(() => {
 .map-area {
   width: 100%;
   height: 100%;
-  min-height: 640px;
 }
 
 .date-pill {
@@ -877,7 +876,8 @@ onBeforeUnmount(() => {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: 0.22s ease;
+  opacity: 0.78;
 }
 
 .category-chip:nth-child(2) {
@@ -897,8 +897,12 @@ onBeforeUnmount(() => {
 }
 
 .category-chip.active {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+  opacity: 1;
+  transform: translateX(-4px) scale(1.04);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.22),
+    0 0 0 3px rgba(255, 255, 255, 0.45);
 }
 
 .detail-card {
