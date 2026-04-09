@@ -49,7 +49,7 @@
         <router-view />
       </main>
     </div>
-        <!-- 플로팅 + 버튼 -->
+    <!-- 플로팅 + 버튼 -->
     <button class="floating-add-button" @click="goToCreate">+</button>
   </div>
 </template>
@@ -60,7 +60,6 @@ import { useRouter } from 'vue-router';
 
 const hoveredMenu = ref(null);
 const router = useRouter();
-
 
 const menuItems = [
   { name: 'Dashboard', label: '대시보드', path: '/', iconBase: 'Setting_vert' },
@@ -290,5 +289,31 @@ const goToCreate = () => {
     font-size: 18px;
     padding: 0 25px;
   }
+}
+
+/* 플로팅 + 버튼 */
+.floating-add-button {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #f8b333;
+  color: #ffffff;
+  border: none;
+  font-size: 32px;
+  font-weight: 300;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.floating-add-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.floating-add-button:active {
+  transform: scale(0.95);
 }
 </style>

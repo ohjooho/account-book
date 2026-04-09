@@ -31,7 +31,8 @@
                 :class="{
                   'is-active': hoveredCategoryId === category.categoryId,
                   'is-muted':
-                    hoveredCategoryId && hoveredCategoryId !== category.categoryId,
+                    hoveredCategoryId &&
+                    hoveredCategoryId !== category.categoryId,
                 }"
                 :style="getDonutSegmentStyle(category)"
                 @mouseenter="hoveredCategoryId = category.categoryId"
@@ -53,7 +54,8 @@
               :class="{
                 'is-active': hoveredCategoryId === category.categoryId,
                 'is-muted':
-                  hoveredCategoryId && hoveredCategoryId !== category.categoryId,
+                  hoveredCategoryId &&
+                  hoveredCategoryId !== category.categoryId,
               }"
               @mouseenter="hoveredCategoryId = category.categoryId"
               @mouseleave="hoveredCategoryId = null"
@@ -145,12 +147,12 @@
 
         <template v-else>
           <div class="forecast-total">
-          <span>예상 총지출</span>
-          <strong>{{ formatCurrency(nextMonthForecast.totalSpend) }}</strong>
-          <small>
-            이번 달 대비
-            {{ nextMonthForecast.deltaText }}
-          </small>
+            <span>예상 총지출</span>
+            <strong>{{ formatCurrency(nextMonthForecast.totalSpend) }}</strong>
+            <small>
+              이번 달 대비
+              {{ nextMonthForecast.deltaText }}
+            </small>
           </div>
 
           <div class="forecast-list">
@@ -210,7 +212,6 @@ let isViewActive = true;
 
 onMounted(async () => {
   try {
-    // 지금은 data2.json 기반 목업 데이터를 가져오고, 나중에는 이 호출만 실제 API로 바꾸면 됩니다.
     const data = await getReportData();
 
     if (!isViewActive) {
@@ -271,9 +272,19 @@ function createArcPath(startAngle, endAngle, innerRadius, outerRadius) {
   // 도넛 한 조각을 SVG path 문자열처럼 계산해서 clip-path로
   const centerX = DONUT_CENTER;
   const centerY = DONUT_CENTER;
-  const startOuter = polarToCartesian(centerX, centerY, outerRadius, startAngle);
+  const startOuter = polarToCartesian(
+    centerX,
+    centerY,
+    outerRadius,
+    startAngle,
+  );
   const endOuter = polarToCartesian(centerX, centerY, outerRadius, endAngle);
-  const startInner = polarToCartesian(centerX, centerY, innerRadius, startAngle);
+  const startInner = polarToCartesian(
+    centerX,
+    centerY,
+    innerRadius,
+    startAngle,
+  );
   const endInner = polarToCartesian(centerX, centerY, innerRadius, endAngle);
   const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
 
@@ -359,9 +370,9 @@ function createArcPath(startAngle, endAngle, innerRadius, outerRadius) {
 
 .hero-content {
   display: grid;
-  grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.2fr);
-  gap: 24px;
-  align-items: center;
+  grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
+  gap: 20px;
+  align-items: start;
   overflow: visible;
 }
 
@@ -497,6 +508,15 @@ function createArcPath(startAngle, endAngle, innerRadius, outerRadius) {
   flex-direction: column;
   gap: 14px;
   min-width: 0;
+}
+
+.summary-panel {
+  justify-content: flex-start;
+  justify-self: start;
+  align-self: start;
+  width: 100%;
+  max-width: 760px;
+  padding-top: 12px;
 }
 
 .summary-line,

@@ -13,7 +13,7 @@
   },
   "categories": [
     { "id": "income", "name": "income", "labelKo": "수입", "type": "income", "color": "#A3CB38" },
-    { "id": "living", "name": "living", "labelKo": "생활", "type": "expense", "color": "#5D6D97" },
+    { "id": "living", "name": "living", "labelKo": "주거/통신", "type": "expense", "color": "#5D6D97" },
     { "id": "subscription", "name": "subscription", "labelKo": "구독", "type": "expense", "color": "#1B2A41" },
     { "id": "shopping", "name": "shopping", "labelKo": "쇼핑", "type": "expense", "color": "#4A4A4A" },
     { "id": "food", "name": "food", "labelKo": "식비", "type": "expense", "color": "#D46A7E" },
@@ -188,7 +188,7 @@
       "totalCashflow": 1543400,
       "expenseTransactionCount": 19,
       "incomeTransactionCount": 1,
-      "aiSummary": "3월은 생활비 수준은 비슷했지만 쇼핑과 식비가 함께 늘어나 2월보다 지출이 소폭 증가했습니다.",
+      "aiSummary": "3월은 주거/통신 지출 수준은 비슷했지만 쇼핑과 식비가 함께 늘어나 2월보다 지출이 소폭 증가했습니다.",
       "spendingAnalysis": [
         { "categoryId": "income", "totalAmount": 3000000 },
         { "categoryId": "living", "totalAmount": 847000, "percentage": 58.15 },
@@ -210,7 +210,7 @@
       "totalCashflow": 2018500,
       "expenseTransactionCount": 12,
       "incomeTransactionCount": 1,
-      "aiSummary": "4월은 8일까지의 부분 집계이며 월세 납부 영향으로 생활비 비중이 매우 높게 나타납니다.",
+      "aiSummary": "4월은 8일까지의 부분 집계이며 월세 납부 영향으로 주거/통신 비중이 매우 높게 나타납니다.",
       "spendingAnalysis": [
         { "categoryId": "income", "totalAmount": 3000000 },
         { "categoryId": "living", "totalAmount": 792000, "percentage": 80.69 },
