@@ -10,8 +10,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const fetchTransactions = async () => {
     try {
       const response = await axios.get(BASEURI);
-      console.log('데이터 출력');
-      console.log(response.data);
       transactions.value = response.data;
     } catch (e) {
       console.error('거래 목록 조회 실패: ', e);
@@ -63,6 +61,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       );
     } catch (e) {
       console.error('거래 삭제 실패:', e);
+      throw e;
     }
   };
 

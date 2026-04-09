@@ -12,10 +12,7 @@ export const useCategoryStore = defineStore('category', () => {
   const fetchCategories = async () => {
     try {
       const response = await axios.get(BASEURI);
-      console.log('category response', response);
-      console.log('category response.data', response.data);
       categories.value = response.data;
-      console.log(categories);
     } catch (e) {
       console.error('카테고리 조회 실패:', e);
     }
