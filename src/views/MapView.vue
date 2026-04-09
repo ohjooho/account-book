@@ -6,23 +6,43 @@
       </div>
     </div>
 
-    <div class="map-board">
+    <div class="map-board" @click="isFilterOpen = false">
       <div class="date-pill" @click="isCalendarOpen = !isCalendarOpen">
         <button class="date-arrow" @click.stop="moveDate(-1)">‹</button>
         <span>{{ formattedSelectedDate }}</span>
         <button class="date-arrow" @click.stop="moveDate(1)">›</button>
       </div>
 
-      <div class="category-stack">
-        <button
-          v-for="category in categories"
-          :key="category.key"
-          class="category-chip"
-          :class="{ active: selectedCategory === category.key }"
-          @click="selectCategory(category.key)"
-        >
-          {{ category.label }}
-        </button>
+      <div class="filter-wrap">
+        <button class="filter-toggle" @click.stop="isFilterOpen = !isFilterOpen" aria-label="filter">
+  <svg
+    class="filter-icon"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M7 10L12 15L17 10"
+      stroke="currentColor"
+      stroke-width="2.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</button>
+
+        <div v-if="isFilterOpen" class="category-stack" @click.stop>
+          <button
+            v-for="category in categories"
+            :key="category.key"
+            class="category-chip"
+            :class="{ active: selectedCategory === category.key }"
+            :style="{ background: category.color }"
+            @click="selectCategory(category.key)"
+          >
+            {{ category.label }}
+          </button>
+        </div>
       </div>
 
       <div v-if="isCalendarOpen" class="calendar-card">
@@ -56,14 +76,23 @@
 
       <div ref="mapRef" class="map-area"></div>
 
-      <div v-if="selectedItem" class="detail-card">
+      <div
+  v-if="selectedItem"
+  class="detail-card clickable"
+  @click="goToTransactionDetail"
+>
         <div class="detail-top">{{ selectedItem.title }}</div>
 
         <div class="detail-body">
           <div class="detail-left">
             <div class="detail-date">{{ selectedItem.date }}</div>
             <div class="detail-time">{{ selectedItem.time }}</div>
-            <div class="detail-category">{{ selectedItem.categoryLabel }}</div>
+            <div
+              class="detail-category"
+              :style="{ color: selectedItem.categoryColor }"
+            >
+              {{ selectedItem.categoryLabel }}
+            </div>
             <div
               class="detail-amount"
               :class="selectedItem.type === 'income' ? 'income' : 'expense'"
@@ -83,7 +112,11 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import data2 from '../../data2.json'
+
+const router = useRouter()
 
 const mapRef = ref(null)
 const map = ref(null)
@@ -91,260 +124,31 @@ const markers = ref([])
 const selectedCategory = ref('all')
 const selectedItem = ref(null)
 const isCalendarOpen = ref(false)
+const isFilterOpen = ref(false)
 const transactions = ref([])
 
 const weekdayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
-const categories = [
-  { key: 'all', label: '전체' },
-  { key: 'food', label: '식비' },
-  { key: 'transport', label: '교통' },
-  { key: 'shopping', label: '쇼핑' },
-  { key: 'etc', label: '기타' }
-]
+const categories = computed(() => {
+  return [
+    { key: 'all', label: '전체', color: '#4474FF', type: 'all' },
+    ...data2.categories.map((category) => ({
+      key: category.id,
+      label: category.labelKo,
+      color: category.color?.startsWith('#') ? category.color : `#${category.color}`,
+      type: category.type
+    }))
+  ]
+})
 
 function startOfDay(date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
 
-const today = ref(startOfDay(new Date()))
-const selectedDate = ref(startOfDay(new Date()))
-const currentMonth = ref(new Date(today.value.getFullYear(), today.value.getMonth(), 1))
-
-let dateCheckTimer = null
-
-const placePool = {
-  food: [
-    {
-      title: '스타벅스 홍대역점',
-      address: '서울특별시 마포구 양화로 165',
-      lat: 37.5563,
-      lng: 126.9220,
-      icon: '☕',
-      baseAmount: 12000,
-      time: '09:30'
-    },
-    {
-      title: '맥도날드 홍대점',
-      address: '서울특별시 마포구 홍익로 29',
-      lat: 37.5571,
-      lng: 126.9236,
-      icon: '🍔',
-      baseAmount: 8900,
-      time: '13:10'
-    },
-    {
-      title: '서브웨이 합정점',
-      address: '서울특별시 마포구 양화로 45',
-      lat: 37.5508,
-      lng: 126.9139,
-      icon: '🥪',
-      baseAmount: 9800,
-      time: '12:20'
-    },
-    {
-      title: '이디야 연남점',
-      address: '서울특별시 마포구 연남동',
-      lat: 37.5621,
-      lng: 126.9262,
-      icon: '🥤',
-      baseAmount: 5300,
-      time: '16:15'
-    },
-    {
-      title: '김밥천국 합정점',
-      address: '서울특별시 마포구 합정동',
-      lat: 37.5504,
-      lng: 126.9142,
-      icon: '🍙',
-      baseAmount: 7500,
-      time: '11:40'
-    },
-    {
-      title: '메가커피 연남점',
-      address: '서울특별시 마포구 연남동',
-      lat: 37.5612,
-      lng: 126.9258,
-      icon: '🧋',
-      baseAmount: 5500,
-      time: '10:20'
-    }
-  ],
-  transport: [
-    {
-      title: '지하철 2호선',
-      address: '홍대입구역',
-      lat: 37.5574,
-      lng: 126.9242,
-      icon: '🚇',
-      baseAmount: 1400,
-      time: '08:20'
-    },
-    {
-      title: '버스 환승',
-      address: '홍대입구역 버스정류장',
-      lat: 37.5558,
-      lng: 126.9251,
-      icon: '🚌',
-      baseAmount: 1500,
-      time: '18:40'
-    },
-    {
-      title: '택시',
-      address: '합정역 인근',
-      lat: 37.5499,
-      lng: 126.9135,
-      icon: '🚕',
-      baseAmount: 11200,
-      time: '22:10'
-    },
-    {
-      title: '공항철도',
-      address: '홍대입구역 공항철도',
-      lat: 37.5570,
-      lng: 126.9260,
-      icon: '🚆',
-      baseAmount: 4450,
-      time: '07:50'
-    },
-    {
-      title: '마을버스',
-      address: '연남동 정류장',
-      lat: 37.5604,
-      lng: 126.9267,
-      icon: '🚐',
-      baseAmount: 1200,
-      time: '09:05'
-    },
-    {
-      title: '자전거 대여',
-      address: '홍대입구역 대여소',
-      lat: 37.5566,
-      lng: 126.9248,
-      icon: '🚲',
-      baseAmount: 1000,
-      time: '17:10'
-    }
-  ],
-  shopping: [
-    {
-      title: '올리브영 홍대점',
-      address: '서울특별시 마포구 어울마당로',
-      lat: 37.5553,
-      lng: 126.9212,
-      icon: '🛍️',
-      baseAmount: 23000,
-      time: '15:20'
-    },
-    {
-      title: '다이소 홍대점',
-      address: '서울특별시 마포구 홍익로 6길',
-      lat: 37.5568,
-      lng: 126.9231,
-      icon: '🛒',
-      baseAmount: 8000,
-      time: '19:05'
-    },
-    {
-      title: 'ABC마트',
-      address: '서울특별시 마포구 양화로',
-      lat: 37.5570,
-      lng: 126.9233,
-      icon: '👟',
-      baseAmount: 67000,
-      time: '17:30'
-    },
-    {
-      title: '무신사 스탠다드 홍대',
-      address: '서울특별시 마포구 잔다리로',
-      lat: 37.5559,
-      lng: 126.9218,
-      icon: '👕',
-      baseAmount: 39000,
-      time: '14:10'
-    },
-    {
-      title: '아트박스 홍대점',
-      address: '서울특별시 마포구 홍익로',
-      lat: 37.5560,
-      lng: 126.9225,
-      icon: '🎁',
-      baseAmount: 12000,
-      time: '16:45'
-    },
-    {
-      title: '에이블리 픽업',
-      address: '서울특별시 마포구 서교동',
-      lat: 37.5548,
-      lng: 126.9198,
-      icon: '📦',
-      baseAmount: 21000,
-      time: '18:15'
-    }
-  ],
-  etc: [
-    {
-      title: '편의점',
-      address: '서울특별시 마포구 와우산로',
-      lat: 37.5542,
-      lng: 126.9237,
-      icon: '🏪',
-      baseAmount: 4500,
-      time: '22:15',
-      type: 'expense'
-    },
-    {
-      title: '프리랜서 정산',
-      address: '온라인 입금',
-      lat: 37.5585,
-      lng: 126.9203,
-      icon: '₩',
-      baseAmount: 180000,
-      time: '11:00',
-      type: 'income'
-    },
-    {
-      title: 'GS25',
-      address: '서울특별시 마포구 서교동',
-      lat: 37.5537,
-      lng: 126.9184,
-      icon: '🏪',
-      baseAmount: 2900,
-      time: '23:10',
-      type: 'expense'
-    },
-    {
-      title: '용돈 입금',
-      address: '계좌 입금',
-      lat: 37.5563,
-      lng: 126.9220,
-      icon: '₩',
-      baseAmount: 100000,
-      time: '20:00',
-      type: 'income'
-    },
-    {
-      title: '세탁소',
-      address: '서울특별시 마포구 동교동',
-      lat: 37.5581,
-      lng: 126.9263,
-      icon: '🧺',
-      baseAmount: 7000,
-      time: '19:40',
-      type: 'expense'
-    },
-    {
-      title: '문구점',
-      address: '서울특별시 마포구 서교동',
-      lat: 37.5551,
-      lng: 126.9207,
-      icon: '✏️',
-      baseAmount: 3500,
-      time: '12:55',
-      type: 'expense'
-    }
-  ]
-}
+const sourceToday = startOfDay(new Date(data2.meta.currentDate))
+const today = ref(sourceToday)
+const selectedDate = ref(sourceToday)
+const currentMonth = ref(new Date(sourceToday.getFullYear(), sourceToday.getMonth(), 1))
 
 function formatCurrency(value) {
   return `₩${value.toLocaleString('ko-KR')}`
@@ -357,109 +161,61 @@ function formatDate(date) {
   return `${year}-${month}-${day}`
 }
 
-function getCategoryLabel(category) {
-  if (category === 'food') return '식비'
-  if (category === 'transport') return '교통'
-  if (category === 'shopping') return '쇼핑'
-  return '기타'
+function getCategoryInfo(categoryId) {
+  return data2.categories.find((category) => category.id === categoryId)
 }
 
-function getTypeForCategory(category, place) {
-  if (category === 'etc') return place.type ?? 'expense'
-  return 'expense'
+function formatTimeFromId(id) {
+  const str = String(id)
+  const tail = str.slice(-4)
+  const hour = Number(tail.slice(0, 2)) % 24
+  const minute = Number(tail.slice(2, 4)) % 60
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
 }
 
-function pickTwoPlaces(list, seed) {
-  const firstIndex = seed % list.length
-  const secondIndex = (seed + 2) % list.length
-
-  if (firstIndex === secondIndex) {
-    return [list[firstIndex], list[(secondIndex + 1) % list.length]]
-  }
-
-  return [list[firstIndex], list[secondIndex]]
+function getMarkerIcon(item) {
+  if (item.type === 'income') return '₩'
+  if (item.categoryId === 'food') return '🍽️'
+  if (item.categoryId === 'transport') return '🚌'
+  if (item.categoryId === 'shopping') return '🛍️'
+  if (item.categoryId === 'medical') return '💊'
+  if (item.categoryId === 'subscription') return '💳'
+  if (item.categoryId === 'living') return '🏠'
+  if (item.categoryId === 'etc') return '📌'
+  return '📍'
 }
 
-function generateTransactionsUntilToday() {
-  const result = []
-  let id = 1
-  const now = new Date()
-  const startDate = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate())
-  const endDate = startOfDay(new Date())
-  const categoryOrder = ['food', 'transport', 'shopping', 'etc']
+function mapTransactionsFromData2() {
+  return data2.transactions.map((item) => {
+    const category = getCategoryInfo(item.categoryId)
+    const categoryColor = category?.color?.startsWith('#')
+      ? category.color
+      : `#${category?.color ?? '4474FF'}`
 
-  for (
-    let cursor = new Date(startDate);
-    cursor <= endDate;
-    cursor.setDate(cursor.getDate() + 1)
-  ) {
-    const current = new Date(cursor)
-    const year = current.getFullYear()
-    const month = current.getMonth()
-    const day = current.getDate()
-    const dateString = formatDate(current)
-
-    categoryOrder.forEach((category, categoryIndex) => {
-      const seed = year + month + day + categoryIndex
-      const selectedPlaces = pickTwoPlaces(placePool[category], seed)
-
-      selectedPlaces.forEach((place, placeIndex) => {
-        const type = getTypeForCategory(category, place)
-
-        let amountOffset = 0
-        if (category === 'food') amountOffset = day * 180 + placeIndex * 350 + month * 40
-        else if (category === 'transport') amountOffset = day * 15 + placeIndex * 30 + month * 5
-        else if (category === 'shopping') amountOffset = day * 450 + placeIndex * 900 + month * 120
-        else if (type === 'income') amountOffset = day * 1200 + placeIndex * 500 + month * 200
-        else amountOffset = day * 90 + placeIndex * 140 + month * 20
-
-        const amountValue = place.baseAmount + amountOffset
-
-        const hour = Number(place.time.split(':')[0])
-        const minute = Number(place.time.split(':')[1])
-        const adjustedMinute = String((minute + day + placeIndex * 7 + month) % 60).padStart(2, '0')
-        const adjustedTime = `${String(hour).padStart(2, '0')}:${adjustedMinute}`
-
-        result.push({
-          id: id++,
-          title: place.title,
-          category,
-          categoryLabel: getCategoryLabel(category),
-          type,
-          amount: formatCurrency(amountValue),
-          date: dateString,
-          time: adjustedTime,
-          address: place.address,
-          lat: Number((place.lat + day * 0.00012 + placeIndex * 0.00028 + month * 0.00003).toFixed(6)),
-          lng: Number((place.lng - day * 0.00010 + placeIndex * 0.00022 - month * 0.00003).toFixed(6)),
-          icon: place.icon
-        })
-      })
-    })
-  }
-
-  return result
-}
-
-function refreshTransactionsForToday() {
-  today.value = startOfDay(new Date())
-  transactions.value = generateTransactionsUntilToday()
-
-  if (selectedDate.value > today.value) {
-    selectedDate.value = new Date(today.value)
-    currentMonth.value = new Date(today.value.getFullYear(), today.value.getMonth(), 1)
-  }
-
-  renderMarkers()
-}
-
-function startDateWatcher() {
-  dateCheckTimer = setInterval(() => {
-    const now = startOfDay(new Date())
-    if (!isSameDate(now, today.value)) {
-      refreshTransactionsForToday()
+    return {
+      id: item.id,
+      title: item.place || item.memo || '거래 내역',
+      category: item.categoryId,
+      categoryLabel: category?.labelKo ?? item.categoryId,
+      categoryColor,
+      type: item.type,
+      amount: formatCurrency(item.price),
+      amountValue: item.price,
+      date: item.date,
+      time: formatTimeFromId(item.id),
+      address: item.place || '',
+      lat: item.location?.lat ?? 37.5665,
+      lng: item.location?.lng ?? 126.978,
+      icon: getMarkerIcon(item),
+      memo: item.memo ?? '',
+      products: item.products ?? [],
+      receiptId: item.receiptId ?? null
     }
-  }, 30000)
+  })
+}
+
+function initializeTransactions() {
+  transactions.value = mapTransactionsFromData2()
 }
 
 const formattedSelectedDate = computed(() => {
@@ -568,17 +324,25 @@ function moveMonth(direction) {
   currentMonth.value = nextMonth
 }
 
-function selectCategory(categoryKey) {
-  selectedCategory.value = categoryKey
+function goToTransactionDetail() {
+  if (!selectedItem.value?.id) return
+
+  router.push({
+    path: '/transactions',
+    query: {
+      selectedId: selectedItem.value.id
+    }
+  })
 }
 
-function createMarkerImage(category) {
-  let fill = '#4474FF'
+function selectCategory(categoryKey) {
+  selectedCategory.value = categoryKey
+  isFilterOpen.value = false
+}
 
-  if (category === 'food') fill = '#FF6B6B'
-  else if (category === 'transport') fill = '#FFAE00'
-  else if (category === 'shopping') fill = '#FF8C42'
-  else if (category === 'etc') fill = '#4C4C54'
+function createMarkerImage(categoryKey) {
+  const category = categories.value.find((item) => item.key === categoryKey)
+  const fill = category?.color ?? '#4474FF'
 
   const svg = `
     <svg width="44" height="56" viewBox="0 0 44 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -701,14 +465,9 @@ watch([selectedDate, selectedCategory], () => {
 })
 
 onMounted(async () => {
-  refreshTransactionsForToday()
-  startDateWatcher()
+  initializeTransactions()
   await nextTick()
   await initMap()
-})
-
-onBeforeUnmount(() => {
-  if (dateCheckTimer) clearInterval(dateCheckTimer)
 })
 </script>
 
@@ -763,13 +522,15 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  height: 44px;
+  padding: 0 14px;
   background: rgba(68, 68, 72, 0.9);
   color: #ffffff;
   border-radius: 17px;
   font-size: 16px;
   font-weight: 600;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  box-sizing: border-box;
 }
 
 .date-arrow {
@@ -784,7 +545,7 @@ onBeforeUnmount(() => {
 
 .calendar-card {
   position: absolute;
-  top: 72px;
+  top: 76px;
   left: 24px;
   z-index: 10;
   width: 420px;
@@ -856,44 +617,76 @@ onBeforeUnmount(() => {
   cursor: not-allowed;
 }
 
-.category-stack {
+.filter-wrap {
   position: absolute;
   top: 24px;
   right: 24px;
   z-index: 10;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 8px;
 }
 
+.filter-toggle {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 17px;
+  background: rgba(68, 68, 72, 0.9);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  transition: 0.2s ease;
+  backdrop-filter: blur(8px);
+  box-sizing: border-box;
+}
+
+.filter-toggle:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.filter-toggle:active {
+  transform: scale(0.97);
+}
+
+.filter-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+
+.filter-toggle.open .filter-icon {
+  transform: rotate(180deg);
+}
+
+.category-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(76px, 1fr));
+  gap: 8px;
+  margin-top: 2px;
+  width: 168px;
+}
+
 .category-chip {
-  min-width: 70px;
+  width: 100%;
+  min-width: 0;
   padding: 10px 12px;
   border-radius: 17px;
-  border: 1px solid #d9d9df;
-  background: rgba(68, 116, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.22s ease;
-  opacity: 0.78;
+  opacity: 0.82;
+  text-align: center;
 }
 
-.category-chip:nth-child(2) {
-  background: rgba(255, 107, 107, 0.92);
-}
-
-.category-chip:nth-child(3) {
-  background: rgba(255, 174, 0, 0.92);
-}
-
-.category-chip:nth-child(4) {
-  background: rgba(255, 140, 66, 0.92);
-}
-
-.category-chip:nth-child(5) {
-  background: rgba(76, 76, 84, 0.92);
+.category-chip:last-child {
+  grid-column: 1 / -1;
 }
 
 .category-chip.active {
@@ -916,6 +709,16 @@ onBeforeUnmount(() => {
   border: 1px solid #d9d9df;
   background: #ffffff;
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.14);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.detail-card.clickable {
+  cursor: pointer;
+}
+
+.detail-card.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
 }
 
 .detail-top {
@@ -960,7 +763,6 @@ onBeforeUnmount(() => {
 .detail-category {
   font-size: 16px;
   font-weight: 600;
-  color: #ff6b6b;
 }
 
 .detail-amount {
@@ -1009,9 +811,10 @@ onBeforeUnmount(() => {
   }
 
   .detail-card {
-    left: 16px;
-    right: 16px;
-    width: auto;
-  }
+  left: 16px;
+  right: 16px;
+  width: auto;
+  transform: none;
+}
 }
 </style>
