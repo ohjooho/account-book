@@ -37,7 +37,7 @@
         </thead>
         <tbody>
           <tr
-            v-for="transaction in transactionsStore.transactions"
+            v-for="transaction in sortedTransactions"
             :key="transaction.id"
             class="transaction-row"
             @click="goToDetail(transaction.id)"
@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoryStore } from '@/stores/category';
@@ -122,6 +122,19 @@ const formatDate = (dateStr) => {
 const goToDetail = (id) => {
   router.push(`/transactions/${id}`);
 };
+
+// 날짜 최신순으로 정렬된 거래 목록
+const sortedTransactions = computed(() => {
+  // 원본 배열을 훼손하지 않기 위해 복사 후 정렬
+  return [...transactionsStore.transactions].sort((a, b) => {
+    // 날짜 내림차순 (최신이 위)
+    if (a.date !== b.date) {
+      return b.date.localeCompare(a.date);
+    }
+    // 날짜가 같으면 id 내림차순 (큰 id = 나중에 추가된 것)
+    return b.id - a.id;
+  });
+});
 </script>
 
 <style scoped>
