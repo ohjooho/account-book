@@ -4,6 +4,7 @@ import axios from 'axios';
 
 export const useReceiptStore = defineStore('receipt', () => {
   const BASEURI = '/api/receiptDraft';
+  const UPLOAD_URI = 'http://localhost:3001/upload';
   const receiptDraft = ref(null);
 
   //임시 영수증 조회
@@ -11,7 +12,6 @@ export const useReceiptStore = defineStore('receipt', () => {
     try {
       const response = await axios.get(BASEURI);
       receiptDraft.value = response.data;
-      console.log(response);
       return response.data;
     } catch (e) {
       console.log(e);
@@ -25,7 +25,6 @@ export const useReceiptStore = defineStore('receipt', () => {
     try {
       const response = await axios.put(BASEURI, draftData);
       receiptDraft.value = response.data;
-      console.log(response.data);
       return response.data;
     } catch (e) {
       console.error('receiptDraft 저장 실패:', e);
@@ -45,10 +44,31 @@ export const useReceiptStore = defineStore('receipt', () => {
     }
   };
 
+  // 영수증 이미지 업로드
+  const uploadReceiptImage = async (file, receiptId) => {
+    try {
+      const formData = new FormData();
+      formData.append('receiptId', receiptId);
+      formData.append('file', file);
+
+      const response = await axios.post(UPLOAD_URI, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      return response.data.imagePath;
+    } catch (e) {
+      console.error('영수증 이미지 업로드 실패:', e);
+      throw e;
+    }
+  };
+
   return {
     receiptDraft,
     fetchReceiptDraft,
     saveReceiptDraft,
     clearReceiptDraft,
+    uploadReceiptImage,
   };
 });
