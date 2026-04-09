@@ -20,8 +20,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { useReceiptStore } from '@/stores/receipt';
 
 const router = useRouter();
+const receiptStore = useReceiptStore();
 const fileInput = ref(null);
 const loading = ref(false);
 
@@ -47,6 +49,78 @@ const fileToBase64 = async (file) => {
   });
 };
 
+// 위치 받아오는 kakaoscript
+const loadKakaoScript = () => {
+  return new Promise((resolve, reject) => {
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      resolve();
+      return;
+    }
+
+    const existingScript = document.getElementById('kakao-map-sdk');
+
+    if (existingScript) {
+      existingScript.addEventListener('load', resolve, { once: true });
+      existingScript.addEventListener(
+        'error',
+        () => reject(new Error('Kakao SDK load error')),
+        { once: true },
+      );
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = 'kakao-map-sdk';
+
+    const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
+
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`;
+
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Kakao SDK load failed'));
+
+    document.head.appendChild(script);
+  });
+};
+// place를 통해 경도 위도 받아오는 함수
+const getLocationByPlace = async (place) => {
+  if (!place?.trim()) {
+    return { lat: null, lng: null };
+  }
+
+  await loadKakaoScript();
+
+  return new Promise((resolve, reject) => {
+    window.kakao.maps.load(() => {
+      const places = new window.kakao.maps.services.Places();
+
+      places.keywordSearch(place, (data, status) => {
+        if (
+          status === window.kakao.maps.services.Status.OK &&
+          Array.isArray(data) &&
+          data.length > 0
+        ) {
+          resolve({
+            lat: Number(data[0].y),
+            lng: Number(data[0].x),
+          });
+          return;
+        }
+
+        if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+          resolve({
+            lat: null,
+            lng: null,
+          });
+          return;
+        }
+
+        reject(new Error(`카카오 장소 검색 실패: ${status}`));
+      });
+    });
+  });
+};
+//AI 분석 함수
 const analyzeReceiptWithOpenAI = async (file) => {
   const { base64, dataUrl } = await fileToBase64(file);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
@@ -113,6 +187,7 @@ const analyzeReceiptWithOpenAI = async (file) => {
     new Date().toISOString().slice(0, 10).replaceAll('-', '') +
       String(Date.now()).slice(-4),
   );
+  const location = await getLocationByPlace(parsed.place);
   return {
     id: draftId,
     imageUrl: dataUrl,
@@ -128,43 +203,25 @@ const analyzeReceiptWithOpenAI = async (file) => {
       price: parsed.price ?? 0,
       type: parsed.type ?? 'expense',
       place: parsed.place ?? '',
-      location: {
-        lat: null,
-        lng: null,
-      },
+      location,
       products: Array.isArray(parsed.products) ? parsed.products : [],
     },
   };
 };
 
-const saveReceiptDraft = async (draftData) => {
-  const response = await fetch('http://localhost:3001/receiptDrafts', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(draftData),
-  });
-
-  if (!response.ok) {
-    throw new Error('receiptDraft 저장 실패');
-  }
-
-  return await response.json();
-};
-
 const handleFileChange = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
-  console.log(file);
+
   loading.value = true;
 
   try {
     const draftData = await analyzeReceiptWithOpenAI(file);
-    //   const savedDraft = await saveReceiptDraft(draftData);
+    // Data에 receiptDraft에 저장하기
+    const savedDraft = await receiptStore.saveReceiptDraft(draftData);
+    
     console.log(draftData);
-
-    //   router.push(`/receipt/${savedDraft.id}`);
+    router.push(`/receipt/${savedDraft.id}`)
   } catch (error) {
     console.error(error);
     alert('영수증 분석 또는 저장 중 오류가 발생했습니다.');
