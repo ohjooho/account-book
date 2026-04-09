@@ -35,7 +35,7 @@ const routes = [
     // monthly-001: 월별 분석
     path: '/monthly',
     name: 'monthly',
-    component: () => import('@/views/AnalysisView.vue'),
+    component: () => import('@/views/MonthlySummaryView.vue'),
   },
   {
     // receipt-001, 002: AI 영수증 첨부 및 등록

@@ -19,6 +19,14 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
+<<<<<<< HEAD
+=======
+      // 파일 업로드 서버
+      '/upload': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+>>>>>>> develop
     },
   },
 });
