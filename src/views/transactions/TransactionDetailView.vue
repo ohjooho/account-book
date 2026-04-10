@@ -154,6 +154,8 @@ onMounted(async () => {
 
   // URL의 id로 거래 정보 불러오기
   const transactionId = route.params.id;
+  console.log('onMounted id 확인: ', transactionId);
+
   const transaction =
     await transactionsStore.fetchTransactionById(transactionId);
 
@@ -176,11 +178,11 @@ onMounted(async () => {
     memo: transaction.memo || '',
   };
 
-  // ===== 영수증 불러오기 (receiptId가 있을 때만) =====
-  if (transaction.receiptId) {
+  // ===== 영수증 불러오기 (receiptRef가 있을 때만) =====
+  if (transaction.receiptRef) {
     try {
       const response = await axios.get(
-        `/api/receipts/${transaction.receiptId}`,
+        `/api/receipts/${transaction.receiptRef}`,
       );
       receipt.value = response.data;
     } catch (e) {
@@ -208,6 +210,7 @@ const handleUpdate = () => {
 
 // 삭제 버튼
 const handleDelete = async () => {
+  console.log('현재 라우트 파라미터 ID: ', route.params.id);
   // 삭제 확인
   if (!confirm('정말 이 거래를 삭제하시겠습니까?')) {
     return;
@@ -215,7 +218,10 @@ const handleDelete = async () => {
 
   // 삭제 실행
   try {
-    await transactionsStore.deleteTransactions(route.params.id);
+    const idToDelete = route.params.id;
+    console.log('삭제 요청을 보낼 ID:', idToDelete);
+
+    await transactionsStore.deleteTransactions(idToDelete);
     alert('거래가 성공적으로 삭제되었습니다.');
     router.push('/transactions');
   } catch (e) {

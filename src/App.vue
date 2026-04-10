@@ -234,7 +234,7 @@ const goToCreate = () => {
 }
 
 .menu-item:hover,
-.router-link-exact-active {
+.router-link-active {
   background-color: #ffffff;
   color: #000000;
   opacity: 1;

@@ -115,7 +115,18 @@ const formatPrice = (price) => {
 // 날짜 포맷 (2026-04-08 → 4월 8일)
 const formatDate = (dateStr) => {
   const date = new Date(dateStr);
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  const now = new Date();
+
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  // 현재 연도와 데이터의 연도가 같은지 비교
+  if (year === now.getFullYear()) {
+    return `${month}월 ${day}일`;
+  } else {
+    return `${year}년 ${month}월 ${day}일`;
+  }
 };
 
 // 목록 아이템 클릭
@@ -142,6 +153,7 @@ const sortedTransactions = computed(() => {
 .transaction-list-page {
   padding: 24px;
   max-width: 1200px;
+  min-width: 800px;
   margin: 0 auto;
   /* position: relative; */
 }
@@ -199,7 +211,30 @@ section {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  /* 레이아웃 엔진 고정 */
+  table-layout: fixed;
 }
+
+.transaction-table th:nth-child(1) {
+  width: 150px;
+  text-align: left;
+} /* 날짜: 연도 표시 대비 */
+.transaction-table th:nth-child(2) {
+  width: 100px;
+  text-align: left;
+} /* 카테고리 */
+.transaction-table th:nth-child(3) {
+  width: auto;
+  text-align: left;
+} /* 메모: 남는 공간 다 차지 */
+.transaction-table th:nth-child(4) {
+  width: 200px;
+  text-align: right;
+} /* 금액 */
+.transaction-table th:nth-child(5) {
+  width: 100px;
+  text-align: center;
+} /* 유형 */
 
 .transaction-table thead {
   background-color: #f8f9fa;
@@ -207,7 +242,6 @@ section {
 
 .transaction-table th {
   padding: 12px 16px;
-  text-align: left;
   font-weight: 600;
   color: #555555;
   border-bottom: 2px solid #e0e0e0;
@@ -216,6 +250,12 @@ section {
 .transaction-table td {
   padding: 12px 16px;
   border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.transaction-table td:last-child {
+  text-align: center;
 }
 
 .transaction-row {
@@ -231,8 +271,15 @@ section {
   text-align: right;
 }
 
+.align-center {
+  text-align: center;
+}
+
 .memo-cell {
   color: #555555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ===== 카테고리 배지 ===== */
@@ -248,14 +295,15 @@ section {
 /* ===== 금액 ===== */
 .price-cell {
   font-weight: 600;
+  text-align: right;
 }
 
 .price-cell.income {
-  color: #28a745;
+  color: #4f8f86;
 }
 
 .price-cell.expense {
-  color: #dc3545;
+  color: #d46a7e;
 }
 
 /* ===== 유형 배지 ===== */
@@ -269,11 +317,11 @@ section {
 
 .type-badge.income {
   background-color: #d4edda;
-  color: #155724;
+  color: #4f8f86;
 }
 
 .type-badge.expense {
   background-color: #f8d7da;
-  color: #721c24;
+  color: #d46a7e;
 }
 </style>

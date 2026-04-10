@@ -206,7 +206,7 @@ const handleSave = async () => {
     //       ? form.value.products.split(',').map((p) => p.trim())
     //       : [],
     location: null,
-    receiptId: null,
+    receiptRef: '',
   };
 
   // ===== 저장 및 목록 페이지로 이동 =====
