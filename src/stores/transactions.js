@@ -55,9 +55,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
   // 거래 삭제 (tran-005)
   const deleteTransactions = async (id) => {
-    console.log('store, try 이전', id);
     try {
-      console.log('store, try 이후', id);
       await axios.delete(`${BASEURI}/${id}`);
       transactions.value = transactions.value.filter(
         (t) => t.id !== Number(id),

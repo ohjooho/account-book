@@ -154,7 +154,6 @@ onMounted(async () => {
 
   // URL의 id로 거래 정보 불러오기
   const transactionId = route.params.id;
-  console.log('onMounted id 확인: ', transactionId);
 
   const transaction =
     await transactionsStore.fetchTransactionById(transactionId);
@@ -207,8 +206,6 @@ const goBack = () => {
 
 // 수정 버튼
 const handleUpdate = async () => {
-  console.log('현재 라우트 파라미터 ID: ', route.params.id);
-
   // 유효성 검사
 
   // 날짜 필수
@@ -273,7 +270,6 @@ const handleUpdate = async () => {
   // 수정 실행
   try {
     const idToUpdate = route.params.id;
-    console.log('수정 요청을 보낼 ID:', idToUpdate);
 
     await transactionsStore.updateTransactions(idToUpdate, newTransaction);
     alert('거래 정보가 성공적으로 수정되었습니다.');
@@ -286,7 +282,6 @@ const handleUpdate = async () => {
 
 // 삭제 버튼
 const handleDelete = async () => {
-  console.log('현재 라우트 파라미터 ID: ', route.params.id);
   // 삭제 확인
   if (!confirm('거래 내역을 삭제하시겠습니까?')) {
     return;
@@ -295,7 +290,6 @@ const handleDelete = async () => {
   // 삭제 실행
   try {
     const idToDelete = route.params.id;
-    console.log('삭제 요청을 보낼 ID:', idToDelete);
 
     await transactionsStore.deleteTransactions(idToDelete);
     alert('거래 내역이 성공적으로 삭제되었습니다.');

@@ -13,7 +13,7 @@
             :class="{ active: filter.period === 'all' }"
             @click="setPeriod('all')"
           >
-            전체
+            전체 기간
           </button>
           <button
             :class="{ active: filter.period === 'today' }"
@@ -30,9 +30,19 @@
         </div>
 
         <div class="filter-group">
-          <input type="date" v-model="filter.startDate" class="date-input" />
+          <input
+            type="date"
+            v-model="filter.startDate"
+            @input="filter.period = 'custom'"
+            class="date-input"
+          />
           <span>~</span>
-          <input type="date" v-model="filter.endDate" class="date-input" />
+          <input
+            type="date"
+            v-model="filter.endDate"
+            @input="filter.period = 'custom'"
+            class="date-input"
+          />
         </div>
 
         <div class="filter-group">
@@ -51,7 +61,7 @@
           <input
             type="text"
             :value="filter.searchQuery"
-            @input="(e) => (filter.searchQuery = e.target.value)"
+            @input="handleSearchInput"
             placeholder="메모 검색"
             class="search-input"
           />
@@ -120,7 +130,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed, reactive, watch } from 'vue';
+import { onMounted, onBeforeUnmount, computed, reactive, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoryStore } from '@/stores/category';
@@ -142,27 +152,106 @@ const filter = reactive({
   searchQuery: '',
 });
 
+const updateQuery = () => {
+  const query = {
+    category: filter.categoryId || undefined,
+    search: filter.searchQuery || undefined,
+  };
+
+  // '이번 달' 버튼 클릭 시에는 yearMonth 사용
+  if (filter.period === 'month' && filter.startDate) {
+    query.yearMonth = filter.startDate.slice(0, 7);
+  } else {
+    // 직접 날짜를 선택했거나 '오늘'인 경우 start/end 사용
+    query.start = filter.startDate || undefined;
+    query.end = filter.endDate || undefined;
+  }
+
+  router.replace({ path: '/transactions', query });
+};
+
+watch(
+  [() => filter.categoryId, () => filter.startDate, () => filter.endDate],
+  () => {
+    updateQuery();
+  },
+);
+
+let timer = null;
+
+const handleSearchInput = (e) => {
+  if (timer) {
+    clearTimeout(timer);
+  }
+
+  timer = setTimeout(() => {
+    // e.target.value를 바로 filter에 넣고, filteredTransactions가 이를 감지해 자동으로 리스트 변환.
+    filter.searchQuery = e.target.value.trim();
+
+    // 만약 URL 업데이트 함수를 만드셨다면 여기서 호출하세요.
+    updateQuery();
+  }, 300);
+};
+
+// 컴포넌트가 사라질 때 타이머 제거 (메모리 누수 방지)
+onBeforeUnmount(() => {
+  if (timer) {
+    clearTimeout(timer);
+  }
+});
+
 onMounted(async () => {
   await transactionsStore.fetchTransactions();
   await categoryStore.fetchCategories();
   // 페이지 로드 시 쿼리 파라미터가 있다면 필터에 적용
-  applyQueryParams();
+  // applyQueryParams();
 });
 
 // functions
 
-// 쿼리 파라미터 적용 함수
+// 1. URL 상태를 필터 변수에 강제로 입히는 함수 (초기화 로직 포함)
 const applyQueryParams = () => {
-  if (route.query.category) filter.categoryId = route.query.category;
-  if (route.query.yearMonth) {
-    // month가 2026-04 형식으로 오면 해당 월의 시작일과 종료일 설정
-    const filterYearMonth = route.query.yearMonth;
-    const filterYear = parseInt(filterYearMonth.split('-')[0]);
-    const filterMonth = parseInt(filterYearMonth.split('-')[1]);
+  const query = route.query;
 
-    filter.startDate = `${filterYearMonth}-01`;
-    const lastDay = new Date(filterYear, filterMonth, 0).getDate();
-    filter.endDate = `${route.query.yearMonth}-${lastDay}`;
+  // 카테고리와 검색어 (없으면 빈 값으로 초기화)
+  filter.categoryId = query.category || '';
+  filter.searchQuery = query.search || '';
+
+  // 날짜 및 기간 모드 동기화
+  if (query.yearMonth) {
+    // yearMonth 처리
+    const [year, month] = query.yearMonth.split('-').map(Number);
+    const lastDay = new Date(year, month, 0).getDate();
+
+    filter.startDate = `${query.yearMonth}-01`;
+    filter.endDate = `${query.yearMonth}-${lastDay}`;
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // getMonth()는 0부터 시작하므로 +1
+
+    // 주소창의 연/월 숫자가 실제 현재 연/월과 정확히 일치하는지 확인
+    if (year === currentYear && month === currentMonth) {
+      filter.period = 'month';
+    } else {
+      filter.period = 'custom'; // 이번 달이 아니면 버튼 불 끄기
+    }
+  } else if (query.start || query.end) {
+    // 직접 입력(custom) 방식 처리
+    filter.startDate = query.start || '';
+    filter.endDate = query.end || '';
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (filter.startDate === todayStr && filter.endDate === todayStr) {
+      filter.period = 'today';
+    } else {
+      filter.period = 'custom';
+    }
+  } else {
+    // 💡 핵심: 주소창에 아무것도 없을 때 (메뉴 클릭 시) 전체 모드로 초기화
+    filter.startDate = '';
+    filter.endDate = '';
+    filter.period = 'all';
   }
 };
 
@@ -172,7 +261,7 @@ watch(
   () => {
     applyQueryParams();
   },
-  { deep: true },
+  { immediate: true, deep: true },
 );
 
 // 기간 버튼 클릭 핸들러
@@ -200,13 +289,13 @@ const setPeriod = (p) => {
     const lastDay = new Date(year, month, 0).getDate();
 
     filter.startDate = `${currentYearMonth}-01`;
-    console.log(filter.startDate);
     filter.endDate = `${currentYearMonth}-${lastDay}`;
   } else if (p === 'all') {
     filter.startDate = '';
     filter.endDate = '';
   }
-  // 'month' 로직 추가 예정
+
+  updateQuery();
 };
 
 // 핵심: 필터링된 거래 목록
@@ -500,9 +589,9 @@ button {
 }
 
 button.active {
-  background: #4f8f86;
+  background: #5d6d97;
   color: white;
-  border-color: #4f8f86;
+  border-color: #5d6d97;
 }
 
 .date-input,
