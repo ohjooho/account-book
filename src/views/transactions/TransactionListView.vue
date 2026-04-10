@@ -7,8 +7,55 @@
 
     <!-- ===== 2. 필터 영역 (나중에 구현) ===== -->
     <section class="filter-section">
-      <div class="placeholder">
-        🔍 필터 영역 (전체 / 오늘 / 이번 주 / 날짜 / 카테고리 / 메모 검색)
+      <div class="filter-container">
+        <div class="filter-group">
+          <button
+            :class="{ active: filter.period === 'all' }"
+            @click="setPeriod('all')"
+          >
+            전체
+          </button>
+          <button
+            :class="{ active: filter.period === 'today' }"
+            @click="setPeriod('today')"
+          >
+            오늘
+          </button>
+          <button
+            :class="{ active: filter.period === 'month' }"
+            @click="setPeriod('month')"
+          >
+            이번 달
+          </button>
+        </div>
+
+        <div class="filter-group">
+          <input type="date" v-model="filter.startDate" class="date-input" />
+          <span>~</span>
+          <input type="date" v-model="filter.endDate" class="date-input" />
+        </div>
+
+        <div class="filter-group">
+          <select v-model="filter.categoryId" class="filter-select">
+            <option value="">카테고리 전체</option>
+            <option
+              v-for="category in categoryStore.categories"
+              :key="category.id"
+              :value="category.id"
+            >
+              {{ category.labelKo }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group search-group">
+          <input
+            type="text"
+            :value="filter.searchQuery"
+            @input="(e) => (filter.searchQuery = e.target.value)"
+            placeholder="메모 검색"
+            class="search-input"
+          />
+        </div>
       </div>
     </section>
 
@@ -17,11 +64,8 @@
       <h2 class="section-title">거래 내역</h2>
 
       <!-- 데이터 없을 때 -->
-      <div
-        v-if="transactionsStore.transactions.length === 0"
-        class="empty-state"
-      >
-        거래 내역이 없습니다.
+      <div v-if="filteredTransactions.length === 0" class="empty-state">
+        조건에 맞는 거래 내역이 없습니다.
       </div>
 
       <!-- 거래 목록 테이블 -->
@@ -37,7 +81,7 @@
         </thead>
         <tbody>
           <tr
-            v-for="transaction in sortedTransactions"
+            v-for="transaction in filteredTransactions"
             :key="transaction.id"
             class="transaction-row"
             @click="goToDetail(transaction.id)"
@@ -76,8 +120,8 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, computed, reactive, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoryStore } from '@/stores/category';
 
@@ -87,13 +131,118 @@ const categoryStore = useCategoryStore();
 
 // 라우터 사용 (페이지 이동)
 const router = useRouter();
+const route = useRoute();
+
+// 필터 상태 관리
+const filter = reactive({
+  period: 'all',
+  startDate: '',
+  endDate: '',
+  categoryId: '',
+  searchQuery: '',
+});
 
 onMounted(async () => {
   await transactionsStore.fetchTransactions();
   await categoryStore.fetchCategories();
+  // 페이지 로드 시 쿼리 파라미터가 있다면 필터에 적용
+  applyQueryParams();
 });
 
 // functions
+
+// 쿼리 파라미터 적용 함수
+const applyQueryParams = () => {
+  if (route.query.category) filter.categoryId = route.query.category;
+  if (route.query.yearMonth) {
+    // month가 2026-04 형식으로 오면 해당 월의 시작일과 종료일 설정
+    const filterYearMonth = route.query.yearMonth;
+    const filterYear = parseInt(filterYearMonth.split('-')[0]);
+    const filterMonth = parseInt(filterYearMonth.split('-')[1]);
+
+    filter.startDate = `${filterYearMonth}-01`;
+    const lastDay = new Date(filterYear, filterMonth, 0).getDate();
+    filter.endDate = `${route.query.yearMonth}-${lastDay}`;
+  }
+};
+
+// 라우트 쿼리 변경 감시
+watch(
+  () => route.query,
+  () => {
+    applyQueryParams();
+  },
+  { deep: true },
+);
+
+// 기간 버튼 클릭 핸들러
+const setPeriod = (p) => {
+  filter.period = p;
+  const now = new Date();
+
+  // 오늘 날짜를 YYYY-MM-DD 형식으로 변환
+  const getTodayStr = () => {
+    return now.toISOString().split('T')[0];
+  };
+
+  if (p === 'today') {
+    // YYYY-MM-DD 형식으로 변환
+    const todayStr = getTodayStr();
+    filter.startDate = todayStr;
+    filter.endDate = todayStr;
+  } else if (p === 'month') {
+    // 1. 현재 연도와 월 YYYY-MM 형식으로 추출
+    const currentYearMonth = getTodayStr().slice(0, 7);
+
+    // 2. 이번 달의 마지막 날 계산
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+
+    filter.startDate = `${currentYearMonth}-01`;
+    console.log(filter.startDate);
+    filter.endDate = `${currentYearMonth}-${lastDay}`;
+  } else if (p === 'all') {
+    filter.startDate = '';
+    filter.endDate = '';
+  }
+  // 'month' 로직 추가 예정
+};
+
+// 핵심: 필터링된 거래 목록
+const filteredTransactions = computed(() => {
+  let list = [...transactionsStore.transactions];
+
+  // 1. 카테고리 필터
+  if (filter.categoryId) {
+    list = list.filter((t) => t.categoryId === filter.categoryId);
+  }
+
+  // 2. 날짜 기간 필터
+  if (filter.startDate) {
+    list = list.filter((t) => t.date >= filter.startDate);
+  }
+  if (filter.endDate) {
+    list = list.filter((t) => t.date <= filter.endDate);
+  }
+
+  // 3. 메모 검색 필터
+  if (filter.searchQuery) {
+    list = list.filter((t) =>
+      t.memo.toLowerCase().includes(filter.searchQuery.toLowerCase()),
+    );
+  }
+
+  // 4. 최신순 정렬
+  return list.sort((a, b) => {
+    // 날짜 내림차순 (최신이 위)
+    if (a.date !== b.date) {
+      return b.date.localeCompare(a.date);
+    }
+    // 날짜가 같으면 id 내림차순 (큰 id = 나중에 추가된 것)
+    return b.id - a.id;
+  });
+});
 
 // 카테고리 이름 가져오기
 const getCategoryName = (categoryId) => {
@@ -135,17 +284,17 @@ const goToDetail = (id) => {
 };
 
 // 날짜 최신순으로 정렬된 거래 목록
-const sortedTransactions = computed(() => {
-  // 원본 배열을 훼손하지 않기 위해 복사 후 정렬
-  return [...transactionsStore.transactions].sort((a, b) => {
-    // 날짜 내림차순 (최신이 위)
-    if (a.date !== b.date) {
-      return b.date.localeCompare(a.date);
-    }
-    // 날짜가 같으면 id 내림차순 (큰 id = 나중에 추가된 것)
-    return b.id - a.id;
-  });
-});
+// const sortedTransactions = computed(() => {
+//   // 원본 배열을 훼손하지 않기 위해 복사 후 정렬
+//   return [...transactionsStore.transactions].sort((a, b) => {
+//     // 날짜 내림차순 (최신이 위)
+//     if (a.date !== b.date) {
+//       return b.date.localeCompare(a.date);
+//     }
+//     // 날짜가 같으면 id 내림차순 (큰 id = 나중에 추가된 것)
+//     return b.id - a.id;
+//   });
+// });
 </script>
 
 <style scoped>
@@ -323,5 +472,52 @@ section {
 .type-badge.expense {
   background-color: #f8d7da;
   color: #d46a7e;
+}
+
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.active {
+  background: #4f8f86;
+  color: white;
+  border-color: #4f8f86;
+}
+
+.date-input,
+.filter-select,
+.search-input {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.search-group {
+  flex-grow: 1;
+}
+
+.search-input {
+  width: 100%;
 }
 </style>
