@@ -472,6 +472,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
+</style>
 .year-button.selected {
   background: #222;
   color: #fff;
