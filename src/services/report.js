@@ -7,8 +7,10 @@ export const REPORT_UI_DESCRIPTIONS = {
   forecast: '현재 소비 흐름을 바탕으로 다음 달 지출 변화를 예상해봤어요.',
 };
 
+const BASEURL = '/api/report';
+
 export async function getReportData() {
-  const response = await axios.get('/api/report');
+  const response = await axios.get(BASEURL);
   return normalizeReportResponse(response.data);
 }
 

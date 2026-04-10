@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "node src/server/reportApi.js",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -17,6 +18,7 @@
     "axios": "^1.14.0",
     "bootstrap": "^5.3.8",
     "fortawesome": "^0.0.1-security",
+    "openai": "^6.34.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.30",
     "vue-router": "^5.0.3",

@@ -1,10 +1,13 @@
-import { readFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { createServer } from 'node:http';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const DATA_FILE_PATH = resolve(__dirname, '../../data2.json')
-const OPENAI_API_URL = 'https://api.openai.com/v1/responses'
+import OpenAI from 'openai';
+import { loadEnv } from 'vite';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_FILE_PATH = resolve(__dirname, '../../data2.json');
 
 const REPORT_PROMPTS = {
   overview:
@@ -13,18 +16,18 @@ const REPORT_PROMPTS = {
     '이번 달 지출 내역을 보고 절약 가능성이 높은 카테고리를 찾아줘. 각 카테고리마다 현실적인 절약 방법과 예상 절약 금액을 제안하고, 그래프에 바로 사용할 수 있도록 항목별 수치를 함께 정리해줘.',
   forecast:
     '이번 달 소비 패턴과 절약 제안을 반영했을 때 다음 달 지출이 어떻게 달라질지 예측해줘. 예상 총지출과 주요 변화 요인을 설명하고, 사용자가 바로 이해할 수 있도록 간단하고 자연스러운 문장으로 정리해줘.',
-}
+};
 
 const REPORT_UI_DESCRIPTIONS = {
   overview: '이번 달 소비가 어디에 집중됐는지 보기 쉽게 정리했어요.',
   savings: '절약 효과가 큰 항목부터 실천 방법과 함께 살펴볼 수 있어요.',
   forecast: '현재 소비 흐름을 바탕으로 다음 달 지출 변화를 예상해봤어요.',
-}
+};
 
-const OPENAI_MODEL = 'gpt-5.4-mini'
-const FORECAST_AI_WEIGHT = 0.25
-const FORECAST_CLAMP_RATE = 0.06
-const FORECAST_MIN_VARIANCE = 30000
+const OPENAI_MODEL = 'gpt-5.4-mini';
+const FORECAST_AI_WEIGHT = 0.25;
+const FORECAST_CLAMP_RATE = 0.06;
+const FORECAST_MIN_VARIANCE = 30000;
 
 const SAVINGS_RATE_MAP = {
   living: 0.1,
@@ -34,7 +37,7 @@ const SAVINGS_RATE_MAP = {
   transport: 0.12,
   medical: 0.08,
   etc: 0.1,
-}
+};
 
 const SAVINGS_TIP_MAP = {
   living: '고정 지출을 다시 점검하면 가장 큰 절약 폭을 만들 수 있어요.',
@@ -44,7 +47,7 @@ const SAVINGS_TIP_MAP = {
   transport: '짧은 거리는 도보나 대중교통으로 대체하면 비용을 안정적으로 줄일 수 있어요.',
   medical: '정기 구매 품목은 비교 구매로 소폭 절감이 가능해요.',
   etc: '기타 지출은 소액 결제를 묶어서 확인하면 새는 돈을 줄일 수 있어요.',
-}
+};
 
 const CATEGORY_LABEL_MAP = {
   income: '수입',
@@ -55,28 +58,32 @@ const CATEGORY_LABEL_MAP = {
   transport: '교통',
   medical: '의료',
   etc: '기타',
-}
+};
 
-let cachedSourceData = null
+let cachedSourceData = null;
+let openAIClient = null;
+let envLoaded = false;
 
 export async function handleReportApi(req, res) {
-  const sourceData = getSourceData()
-  const requestUrl = new URL(req.url ?? '/', 'http://localhost')
-  const requestedMonth = requestUrl.searchParams.get('month')
-  const latestCashflow = getTargetMonthlyCashflow(sourceData, requestedMonth)
+  loadServerEnv();
+
+  const sourceData = getSourceData();
+  const requestUrl = new URL(req.url ?? '/', 'http://localhost');
+  const requestedMonth = requestUrl.searchParams.get('month');
+  const latestCashflow = getTargetMonthlyCashflow(sourceData, requestedMonth);
 
   if (!latestCashflow) {
     sendJson(res, 404, {
       message: 'Report data is not available.',
-    })
-    return
+    });
+    return;
   }
 
   const categoryMap = Object.fromEntries(
     sourceData.categories.map((category) => [category.id, category]),
-  )
-  const fallbackReport = buildFallbackReport(latestCashflow, categoryMap)
-  const apiKey = getApiKey()
+  );
+  const fallbackReport = buildFallbackReport(latestCashflow, categoryMap);
+  const apiKey = getApiKey();
 
   if (!apiKey) {
     sendJson(res, 200, {
@@ -85,30 +92,26 @@ export async function handleReportApi(req, res) {
         source: 'fallback',
         reason: 'missing_api_key',
       },
-    })
-    return
+    });
+    return;
   }
 
   try {
-    const reportContext = buildReportContext(
-      sourceData,
-      latestCashflow.yearMonth,
-      categoryMap,
-    )
+    const reportContext = buildReportContext(sourceData, latestCashflow.yearMonth, categoryMap);
     const aiReport = await requestAiReport(
       reportContext,
       fallbackReport.nextMonthForecast.totalSpend,
       apiKey,
-    )
+    );
 
     sendJson(res, 200, {
       data: mergeAiReportWithFallback(aiReport, fallbackReport, categoryMap),
       meta: {
         source: 'ai',
       },
-    })
+    });
   } catch (error) {
-    console.error('Failed to generate AI report. Falling back to local report data.', error)
+    console.error('Failed to generate AI report. Falling back to local report data.', error);
 
     sendJson(res, 200, {
       data: fallbackReport,
@@ -116,60 +119,114 @@ export async function handleReportApi(req, res) {
         source: 'fallback',
         reason: 'ai_generation_failed',
       },
-    })
+    });
   }
+}
+
+export function createReportApiServer() {
+  return createServer(async (req, res) => {
+    const requestUrl = new URL(req.url ?? '/', 'http://localhost');
+
+    if (
+      req.method === 'GET' &&
+      (requestUrl.pathname === '/report' || requestUrl.pathname === '/api/report')
+    ) {
+      try {
+        await handleReportApi(req, res);
+      } catch (error) {
+        console.error('Failed to handle report API request.', error);
+        sendJson(res, 500, {
+          message: 'Failed to build AI report.',
+        });
+      }
+      return;
+    }
+
+    sendJson(res, 404, {
+      message: 'Not Found',
+    });
+  });
+}
+
+function startReportApiServer() {
+  loadServerEnv();
+
+  const port = Number(process.env.API_PORT || 3000);
+  const server = createReportApiServer();
+
+  server.listen(port, () => {
+    console.log(`Report API server listening on http://localhost:${port}`);
+  });
+}
+
+function loadServerEnv() {
+  if (envLoaded) {
+    return;
+  }
+
+  const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+
+  if (!process.env.OPENAI_API_KEY && env.OPENAI_API_KEY) {
+    process.env.OPENAI_API_KEY = env.OPENAI_API_KEY;
+  }
+
+  if (!process.env.VITE_OPENAI_API_KEY && env.VITE_OPENAI_API_KEY) {
+    process.env.VITE_OPENAI_API_KEY = env.VITE_OPENAI_API_KEY;
+  }
+
+  envLoaded = true;
 }
 
 function getSourceData() {
   if (cachedSourceData) {
-    return cachedSourceData
+    return cachedSourceData;
   }
 
-  cachedSourceData = JSON.parse(readFileSync(DATA_FILE_PATH, 'utf-8'))
-  return cachedSourceData
+  cachedSourceData = JSON.parse(readFileSync(DATA_FILE_PATH, 'utf-8'));
+  return cachedSourceData;
 }
 
 function buildFallbackReport(latestCashflow, categoryMap) {
   const expenseCategories = latestCashflow.spendingAnalysis
     .filter((item) => item.categoryId !== 'income' && item.totalAmount > 0)
     .map((item) => {
-      const category = categoryMap[item.categoryId]
+      const category = categoryMap[item.categoryId];
       const share = Number(
         ((item.totalAmount / latestCashflow.totalSpend) * 100).toFixed(1),
-      )
+      );
 
       return {
         ...item,
         color: category?.color ?? '#999999',
         label: getCategoryLabel(category, item.categoryId),
         share,
-      }
+      };
     })
     .sort((left, right) => right.totalAmount - left.totalAmount)
     .map((item, index, categories) => {
       const startAngle = categories
         .slice(0, index)
-        .reduce((sum, category) => sum + (category.share / 100) * 360, 0)
-      const endAngle = startAngle + (item.share / 100) * 360
+        .reduce((sum, category) => sum + (category.share / 100) * 360, 0);
+      const endAngle = startAngle + (item.share / 100) * 360;
 
       return {
         ...item,
         startAngle,
         endAngle,
-      }
-    })
+      };
+    });
 
   const dominantCategory = expenseCategories[0] ?? {
     label: '주요 카테고리',
     share: 0,
-  }
-  const secondCategory = expenseCategories[1] ?? dominantCategory
-  const thirdCategory = expenseCategories[2] ?? secondCategory
+  };
+  const secondCategory = expenseCategories[1] ?? dominantCategory;
+  const thirdCategory = expenseCategories[2] ?? secondCategory;
   const subscriptionCategory = expenseCategories.find(
     (item) => item.categoryId === 'subscription',
   ) ?? {
     label: '구독',
-  }
+  };
 
   const overviewSummary = [
     `${dominantCategory.label} 지출이 전체의 ${dominantCategory.share}%로 가장 커서 이번 달 소비 흐름을 주도하고 있어요.`,
@@ -179,19 +236,19 @@ function buildFallbackReport(latestCashflow, categoryMap) {
     latestCashflow.isPartialMonth
       ? `${formatMonth(latestCashflow.yearMonth)}은 ${latestCashflow.coveredTo}까지의 부분 집계라 월초 고정 지출 영향이 평소보다 더 크게 보일 수 있어요.`
       : `${formatMonth(latestCashflow.yearMonth)}은 여러 카테고리에 지출이 분산되어 있어 소비 패턴을 비교적 안정적으로 파악하기 좋아요.`,
-  ]
+  ];
 
   const maxSavingsAmount = Math.max(
     ...expenseCategories.map(
       (item) => item.totalAmount * (SAVINGS_RATE_MAP[item.categoryId] ?? 0.1),
     ),
     1,
-  )
+  );
 
   const savingsRecommendations = expenseCategories
     .map((item) => {
-      const rate = SAVINGS_RATE_MAP[item.categoryId] ?? 0.1
-      const expectedSavings = Math.round(item.totalAmount * rate)
+      const rate = SAVINGS_RATE_MAP[item.categoryId] ?? 0.1;
+      const expectedSavings = Math.round(item.totalAmount * rate);
 
       return {
         categoryId: item.categoryId,
@@ -202,18 +259,18 @@ function buildFallbackReport(latestCashflow, categoryMap) {
           ((expectedSavings / maxSavingsAmount) * 100).toFixed(1),
         ),
         tip: `${item.label}에서 ${Math.round(rate * 100)}%만 조정해도 ${formatCurrency(expectedSavings)} 정도 절약할 수 있어요. ${SAVINGS_TIP_MAP[item.categoryId]}`,
-      }
+      };
     })
     .sort((left, right) => right.expectedSavings - left.expectedSavings)
-    .slice(0, 4)
+    .slice(0, 4);
 
   const realisticSavings = Math.round(
     savingsRecommendations.reduce((sum, item) => sum + item.expectedSavings, 0) *
       0.65,
-  )
+  );
 
-  const nextMonthSpend = Math.max(latestCashflow.totalSpend - realisticSavings, 0)
-  const delta = nextMonthSpend - latestCashflow.totalSpend
+  const nextMonthSpend = Math.max(latestCashflow.totalSpend - realisticSavings, 0);
+  const delta = nextMonthSpend - latestCashflow.totalSpend;
 
   return {
     prompts: REPORT_PROMPTS,
@@ -235,16 +292,16 @@ function buildFallbackReport(latestCashflow, categoryMap) {
         '반복 결제와 주거/통신 같은 고정성 지출을 먼저 줄이면 다음 달 예산을 더 안정적으로 유지할 수 있어요.',
       ],
     },
-  }
+  };
 }
 
 function buildReportContext(sourceData, yearMonth, categoryMap) {
   const monthlyCashflow = sourceData.monthlyCashflow.find(
     (item) => item.yearMonth === yearMonth,
-  )
+  );
   const dailyCashflow = sourceData.dailyCashflow.filter(
     (item) => item.yearMonth === yearMonth,
-  )
+  );
   const transactions = sourceData.transactions
     .filter((item) => item.date.startsWith(yearMonth))
     .map((item) => ({
@@ -255,7 +312,7 @@ function buildReportContext(sourceData, yearMonth, categoryMap) {
       price: item.price,
       memo: item.memo,
       place: item.place,
-    }))
+    }));
 
   return {
     meta: {
@@ -273,61 +330,50 @@ function buildReportContext(sourceData, yearMonth, categoryMap) {
     monthlyCashflow,
     dailyCashflow,
     transactions,
-  }
+  };
 }
 
 async function requestAiReport(reportContext, forecastBaseline, apiKey) {
-  const response = await fetch(OPENAI_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      reasoning: { effort: 'low' },
-      input: buildAiPrompt(reportContext, forecastBaseline),
-    }),
-  })
+  const client = getOpenAIClient(apiKey);
+  const response = await client.responses.create({
+    model: OPENAI_MODEL,
+    reasoning: { effort: 'low' },
+    input: buildAiPrompt(reportContext, forecastBaseline),
+  });
 
-  if (!response.ok) {
-    throw new Error(`OpenAI request failed with status ${response.status}`)
-  }
-
-  const payload = await response.json()
-  const outputText = extractOutputText(payload)
+  const outputText = extractOutputText(response);
 
   if (!outputText) {
-    throw new Error('OpenAI response did not include output text.')
+    throw new Error('OpenAI response did not include output text.');
   }
 
-  return JSON.parse(extractJson(outputText))
+  return JSON.parse(extractJson(outputText));
 }
 
 function extractOutputText(payload) {
   if (typeof payload?.output_text === 'string' && payload.output_text.trim()) {
-    return payload.output_text.trim()
+    return payload.output_text.trim();
   }
 
   if (!Array.isArray(payload?.output)) {
-    return ''
+    return '';
   }
 
   return payload.output
     .flatMap((item) => (Array.isArray(item?.content) ? item.content : []))
     .map((content) => {
       if (typeof content?.text === 'string') {
-        return content.text
+        return content.text;
       }
 
       if (typeof content?.output_text === 'string') {
-        return content.output_text
+        return content.output_text;
       }
 
-      return ''
+      return '';
     })
     .filter(Boolean)
-    .join('\n')
+    .join('\n');
 }
 
 function mergeAiReportWithFallback(aiReport, fallbackReport, categoryMap) {
@@ -335,24 +381,24 @@ function mergeAiReportWithFallback(aiReport, fallbackReport, categoryMap) {
     aiReport?.overview?.summary,
     fallbackReport.overviewSummary,
     5,
-  )
+  );
 
   const mergedSavingsItems = normalizeSavingsItems(
     aiReport?.savings?.items,
     fallbackReport.savingsRecommendations,
     categoryMap,
-  )
+  );
 
   const forecastTotalSpend = normalizeForecastTotalSpend(
     aiReport?.forecast?.totalSpend,
     fallbackReport.nextMonthForecast.totalSpend,
-  )
+  );
   const forecastSummary = normalizeStringArray(
     aiReport?.forecast?.summary,
     fallbackReport.nextMonthForecast.summary,
     3,
-  )
-  const delta = forecastTotalSpend - fallbackReport.totalExpense
+  );
+  const delta = forecastTotalSpend - fallbackReport.totalExpense;
 
   return {
     ...fallbackReport,
@@ -366,20 +412,20 @@ function mergeAiReportWithFallback(aiReport, fallbackReport, categoryMap) {
           : `${formatCurrency(Math.abs(delta))} ${delta < 0 ? '감소' : '증가'}`,
       summary: forecastSummary,
     },
-  }
+  };
 }
 
 function normalizeSavingsItems(items, fallbackItems, categoryMap) {
   const normalizedItems = Array.isArray(items)
     ? items
         .map((item) => {
-          const categoryId = item?.categoryId
-          const category = categoryMap[categoryId]
-          const expectedSavings = normalizePositiveInteger(item?.expectedSavings, 0)
-          const tip = typeof item?.tip === 'string' ? item.tip.trim() : ''
+          const categoryId = item?.categoryId;
+          const category = categoryMap[categoryId];
+          const expectedSavings = normalizePositiveInteger(item?.expectedSavings, 0);
+          const tip = typeof item?.tip === 'string' ? item.tip.trim() : '';
 
           if (!category || expectedSavings <= 0 || !tip) {
-            return null
+            return null;
           }
 
           return {
@@ -388,22 +434,22 @@ function normalizeSavingsItems(items, fallbackItems, categoryMap) {
             color: category.color,
             expectedSavings,
             tip,
-          }
+          };
         })
         .filter(Boolean)
         .slice(0, 4)
-    : []
+    : [];
 
-  const targetItems = normalizedItems.length > 0 ? normalizedItems : fallbackItems
+  const targetItems = normalizedItems.length > 0 ? normalizedItems : fallbackItems;
   const maxSavingsAmount = Math.max(
     ...targetItems.map((item) => item.expectedSavings),
     1,
-  )
+  );
 
   return targetItems.map((item) => ({
     ...item,
     barWidth: Number(((item.expectedSavings / maxSavingsAmount) * 100).toFixed(1)),
-  }))
+  }));
 }
 
 function normalizeStringArray(value, fallback, maxLength) {
@@ -412,56 +458,56 @@ function normalizeStringArray(value, fallback, maxLength) {
         .map((item) => (typeof item === 'string' ? item.trim() : ''))
         .filter(Boolean)
         .slice(0, maxLength)
-    : []
+    : [];
 
   if (normalized.length === 0) {
-    return fallback
+    return fallback;
   }
 
   if (normalized.length >= maxLength) {
-    return normalized
+    return normalized;
   }
 
-  const padded = [...normalized]
+  const padded = [...normalized];
 
   for (const sentence of fallback) {
     if (padded.length >= maxLength) {
-      break
+      break;
     }
 
     if (!padded.includes(sentence)) {
-      padded.push(sentence)
+      padded.push(sentence);
     }
   }
 
-  return padded
+  return padded;
 }
 
 function normalizePositiveInteger(value, fallback) {
-  const normalized = Number(value)
+  const normalized = Number(value);
   return Number.isFinite(normalized) && normalized > 0
     ? Math.round(normalized)
-    : fallback
+    : fallback;
 }
 
 function normalizeForecastTotalSpend(value, fallback) {
-  const normalized = Number(value)
+  const normalized = Number(value);
 
   if (!Number.isFinite(normalized) || normalized <= 0) {
-    return fallback
+    return fallback;
   }
 
   const blendedValue = Math.round(
     fallback * (1 - FORECAST_AI_WEIGHT) + normalized * FORECAST_AI_WEIGHT,
-  )
+  );
   const variance = Math.max(
     Math.round(fallback * FORECAST_CLAMP_RATE),
     FORECAST_MIN_VARIANCE,
-  )
-  const minValue = Math.max(fallback - variance, 0)
-  const maxValue = fallback + variance
+  );
+  const minValue = Math.max(fallback - variance, 0);
+  const maxValue = fallback + variance;
 
-  return Math.min(Math.max(blendedValue, minValue), maxValue)
+  return Math.min(Math.max(blendedValue, minValue), maxValue);
 }
 
 function buildAiPrompt(reportContext, forecastBaseline) {
@@ -471,13 +517,13 @@ function buildAiPrompt(reportContext, forecastBaseline) {
       FORECAST_MIN_VARIANCE,
     ),
     0,
-  )
+  );
   const maxForecast =
     forecastBaseline +
     Math.max(
       Math.round(forecastBaseline * FORECAST_CLAMP_RATE),
       FORECAST_MIN_VARIANCE,
-    )
+    );
 
   return `
 당신은 한국어로 답변하는 가계부 소비 분석가입니다.
@@ -516,7 +562,7 @@ function buildAiPrompt(reportContext, forecastBaseline) {
 
 분석 데이터:
 ${JSON.stringify(reportContext, null, 2)}
-`.trim()
+`.trim();
 }
 
 function getTargetMonthlyCashflow(sourceData, requestedMonth) {
@@ -524,17 +570,17 @@ function getTargetMonthlyCashflow(sourceData, requestedMonth) {
     requestedMonth ||
     sourceData.meta?.latestMonthInProgress ||
     sourceData.meta?.latestClosedMonth ||
-    null
+    null;
 
   if (!targetYearMonth) {
-    return sourceData.monthlyCashflow[sourceData.monthlyCashflow.length - 1] ?? null
+    return sourceData.monthlyCashflow[sourceData.monthlyCashflow.length - 1] ?? null;
   }
 
   return (
     sourceData.monthlyCashflow.find((item) => item.yearMonth === targetYearMonth) ??
     sourceData.monthlyCashflow[sourceData.monthlyCashflow.length - 1] ??
     null
-  )
+  );
 }
 
 function getCategoryLabel(category, categoryId) {
@@ -543,39 +589,51 @@ function getCategoryLabel(category, categoryId) {
     CATEGORY_LABEL_MAP[categoryId] ??
     category?.name ??
     categoryId
-  )
+  );
 }
 
 function getApiKey() {
-  return process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || ''
+  return process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || '';
+}
+
+function getOpenAIClient(apiKey) {
+  if (openAIClient) {
+    return openAIClient;
+  }
+
+  openAIClient = new OpenAI({
+    apiKey,
+  });
+
+  return openAIClient;
 }
 
 function extractJson(value) {
-  const trimmedValue = value.trim()
+  const trimmedValue = value.trim();
 
   if (trimmedValue.startsWith('{') && trimmedValue.endsWith('}')) {
-    return trimmedValue
+    return trimmedValue;
   }
 
-  const fencedMatch = trimmedValue.match(/```json\s*([\s\S]*?)```/i)
+  const fencedMatch = trimmedValue.match(/```json\s*([\s\S]*?)```/i);
   if (fencedMatch?.[1]) {
-    return fencedMatch[1].trim()
+    return fencedMatch[1].trim();
   }
 
-  const startIndex = trimmedValue.indexOf('{')
-  const endIndex = trimmedValue.lastIndexOf('}')
+  const startIndex = trimmedValue.indexOf('{');
+  const endIndex = trimmedValue.lastIndexOf('}');
 
   if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-    return trimmedValue.slice(startIndex, endIndex + 1)
+    return trimmedValue.slice(startIndex, endIndex + 1);
   }
 
-  throw new Error('AI response did not include a valid JSON object.')
+  throw new Error('AI response did not include a valid JSON object.');
 }
 
 function sendJson(res, statusCode, payload) {
-  res.statusCode = statusCode
-  res.setHeader('Content-Type', 'application/json; charset=utf-8')
-  res.end(JSON.stringify(payload))
+  res.statusCode = statusCode;
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.end(JSON.stringify(payload));
 }
 
 function formatCurrency(value) {
@@ -583,10 +641,14 @@ function formatCurrency(value) {
     style: 'currency',
     currency: 'KRW',
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(value);
 }
 
 function formatMonth(yearMonth) {
-  const [year, month] = yearMonth.split('-')
-  return `${year}년 ${Number(month)}월`
+  const [year, month] = yearMonth.split('-');
+  return `${year}년 ${Number(month)}월`;
+}
+
+if (process.argv[1] && process.argv[1].endsWith('reportApi.js')) {
+  startReportApiServer();
 }
