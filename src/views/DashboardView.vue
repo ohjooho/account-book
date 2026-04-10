@@ -46,9 +46,37 @@
         </div>
       </article>
 
-      <article class="panel-card panel-card--small">
-        <div class="panel-shell">
-          <div class="panel-placeholder">AI 소비 분석</div>
+      <article
+        class="panel-card panel-card--small panel-card--insight"
+        role="link"
+        tabindex="0"
+        @click="goToReport"
+        @keydown.enter.prevent="goToReport"
+        @keydown.space.prevent="goToReport"
+      >
+        <div class="panel-shell panel-shell--insight">
+          <div v-if="isAiReportLoading" class="loading-state dashboard-loading-state">
+            <div class="loading-spinner" />
+            <p class="loading-text">AI가 소비 분석 요약을 불러오고 있어요.</p>
+          </div>
+
+          <template v-else>
+            <p class="insight-title">AI 소비 분석</p>
+
+            <div v-if="aiReportPreview.length" class="insight-preview">
+              <p
+                v-for="sentence in aiReportPreview"
+                :key="sentence"
+                class="insight-line"
+              >
+                {{ sentence }}
+              </p>
+            </div>
+
+            <div v-else class="panel-placeholder panel-placeholder--insight">
+              AI 소비 분석
+            </div>
+          </template>
         </div>
       </article>
     </div>
@@ -70,8 +98,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import sourceData from '../../data2.json';
+
+import { getReportData } from '@/services/report';
 
 const targetMonth =
   sourceData.meta?.latestMonthInProgress ?? sourceData.meta?.latestClosedMonth;
@@ -81,6 +112,9 @@ const latestCashflow =
 
 const reportMonthLabel = formatMonth(latestCashflow.yearMonth);
 const currentDateLabel = formatDate(sourceData.meta?.currentDate);
+const aiReportPreview = ref([]);
+const isAiReportLoading = ref(true);
+const router = useRouter();
 
 const dashboardCaption = computed(() => {
   if (latestCashflow.isPartialMonth) {
@@ -121,6 +155,22 @@ const summaryCards = computed(() => [
     tone: 'tone-balance',
   },
 ]);
+
+onMounted(async () => {
+  try {
+    const reportData = await getReportData();
+    aiReportPreview.value = reportData.overviewSummary.slice(1, 3);
+  } catch (error) {
+    console.error('Failed to load dashboard AI report preview.', error);
+    aiReportPreview.value = [];
+  } finally {
+    isAiReportLoading.value = false;
+  }
+});
+
+function goToReport() {
+  router.push('/report');
+}
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('ko-KR', {
@@ -330,6 +380,27 @@ function formatDate(date) {
   min-height: 144px;
 }
 
+.panel-card--insight {
+  align-items: stretch;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.panel-card--insight:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  border-color: #d9dde5;
+}
+
+.panel-card--insight:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.25);
+  outline-offset: 2px;
+}
+
 .panel-card--large {
   min-height: 420px;
 }
@@ -347,6 +418,83 @@ function formatDate(date) {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.panel-shell--insight {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 18px 20px;
+}
+
+.insight-preview {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.insight-title {
+  margin: 0 0 14px;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: #111827;
+}
+
+.insight-line {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.panel-placeholder--insight {
+  width: 100%;
+  flex: 1;
+}
+
+.loading-state {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.dashboard-loading-state {
+  width: 100%;
+  min-height: 110px;
+  flex: 1;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 4px solid #e5e7eb;
+  border-top-color: #111827;
+  animation: spin 0.9s linear infinite;
+}
+
+.loading-text {
+  margin: 0;
+  color: #5f6673;
+  font-size: 14px;
+  text-align: center;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .panel-shell--large {
