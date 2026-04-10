@@ -80,7 +80,7 @@
       "place": "KB국민은행 입금",
       "location": { "lat": 37.5665, "lng": 126.978 },
       "products": ["월급"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602010002,
@@ -92,7 +92,7 @@
       "place": "신촌 오피스텔",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["월세"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602030001,
@@ -104,7 +104,7 @@
       "place": "Netflix",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["Netflix Premium"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602050001,
@@ -116,7 +116,7 @@
       "place": "스타벅스 신촌점",
       "location": { "lat": 37.5563, "lng": 126.9385 },
       "products": ["카페라떼", "샌드위치"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602060001,
@@ -128,7 +128,7 @@
       "place": "도시가스/전기요금",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["전기요금", "수도요금"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602070001,
@@ -140,7 +140,7 @@
       "place": "신촌역",
       "location": { "lat": 37.5551, "lng": 126.9368 },
       "products": ["티머니 충전"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602110001,
@@ -152,7 +152,7 @@
       "place": "교보문고 광화문점",
       "location": { "lat": 37.5716, "lng": 126.9768 },
       "products": ["전공서적"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602130001,
@@ -164,7 +164,7 @@
       "place": "연남동 파스타집",
       "location": { "lat": 37.5627, "lng": 126.9236 },
       "products": ["파스타", "에이드"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602140001,
@@ -176,7 +176,7 @@
       "place": "YouTube Premium",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["YouTube Premium"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602180001,
@@ -188,7 +188,7 @@
       "place": "세브란스약국",
       "location": { "lat": 37.5635, "lng": 126.9392 },
       "products": ["감기약", "비타민C"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602200001,
@@ -200,7 +200,7 @@
       "place": "이마트 신촌점",
       "location": { "lat": 37.5567, "lng": 126.9407 },
       "products": ["우유", "계란", "과일", "간편식"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602210001,
@@ -212,7 +212,7 @@
       "place": "카카오T",
       "location": { "lat": 37.5583, "lng": 126.9369 },
       "products": ["택시"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602220001,
@@ -224,7 +224,7 @@
       "place": "ABC마트 홍대점",
       "location": { "lat": 37.556, "lng": 126.9232 },
       "products": ["러닝화"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602250001,
@@ -236,7 +236,7 @@
       "place": "카카오 선물하기",
       "location": { "lat": 37.5665, "lng": 126.978 },
       "products": ["기프티콘"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202602280001,
@@ -248,7 +248,7 @@
       "place": "메가커피 연세대점",
       "location": { "lat": 37.5623, "lng": 126.9365 },
       "products": ["아메리카노"],
-      "receiptId": null
+      "receiptRef": ""
     },
 
     {
@@ -261,7 +261,7 @@
       "place": "KB국민은행 입금",
       "location": { "lat": 37.5665, "lng": 126.978 },
       "products": ["월급"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603010002,
@@ -273,7 +273,7 @@
       "place": "신촌 오피스텔",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["월세"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603030001,
@@ -285,7 +285,7 @@
       "place": "Netflix",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["Netflix Premium"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603040001,
@@ -297,7 +297,7 @@
       "place": "연세대학교 학생회관",
       "location": { "lat": 37.564, "lng": 126.939 },
       "products": ["김밥", "두유"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603060001,
@@ -309,7 +309,7 @@
       "place": "오피스텔 관리사무소",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["관리비", "전기요금"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603070001,
@@ -321,7 +321,7 @@
       "place": "신촌역",
       "location": { "lat": 37.5551, "lng": 126.9368 },
       "products": ["티머니 충전"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603080001,
@@ -333,7 +333,7 @@
       "place": "다이소 신촌점",
       "location": { "lat": 37.5567, "lng": 126.9383 },
       "products": ["수납함", "세제", "휴지"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603100001,
@@ -345,7 +345,7 @@
       "place": "연세대학교 동아리",
       "location": { "lat": 37.565, "lng": 126.9386 },
       "products": ["회비"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603120001,
@@ -357,7 +357,7 @@
       "place": "신촌 덮밥집",
       "location": { "lat": 37.5558, "lng": 126.9361 },
       "products": ["덮밥", "음료"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603140001,
@@ -369,7 +369,7 @@
       "place": "Melon",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["Melon 정기결제"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603150001,
@@ -381,7 +381,7 @@
       "place": "신촌 연세치과",
       "location": { "lat": 37.5578, "lng": 126.9391 },
       "products": ["스케일링"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603170001,
@@ -393,7 +393,7 @@
       "place": "배달의민족",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["치킨", "콜라"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603190001,
@@ -405,7 +405,7 @@
       "place": "무신사 스토어",
       "location": { "lat": 37.5572, "lng": 126.9245 },
       "products": ["봄 자켓"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603200001,
@@ -417,7 +417,7 @@
       "place": "올리브영 신촌점",
       "location": { "lat": 37.5569, "lng": 126.9374 },
       "products": ["비타민", "유산균"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603210001,
@@ -429,7 +429,7 @@
       "place": "Google One",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["Google One"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603240001,
@@ -441,7 +441,7 @@
       "place": "이마트 신촌점",
       "location": { "lat": 37.5567, "lng": 126.9407 },
       "products": ["우유", "계란", "샐러드", "요거트"],
-      "receiptId": 202603240901
+      "receiptRef": 202603240901
     },
     {
       "id": 202603250001,
@@ -453,7 +453,7 @@
       "place": "서울역",
       "location": { "lat": 37.5547, "lng": 126.9706 },
       "products": ["KTX 승차권"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603270001,
@@ -465,7 +465,7 @@
       "place": "올리브영 홍대점",
       "location": { "lat": 37.5575, "lng": 126.924 },
       "products": ["스킨", "립밤"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603290001,
@@ -477,7 +477,7 @@
       "place": "연남 브런치 카페",
       "location": { "lat": 37.5625, "lng": 126.9233 },
       "products": ["프렌치토스트", "커피"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202603300001,
@@ -489,7 +489,7 @@
       "place": "GS25 연세대점",
       "location": { "lat": 37.5631, "lng": 126.9369 },
       "products": ["삼각김밥", "음료"],
-      "receiptId": null
+      "receiptRef": ""
     },
 
     {
@@ -502,7 +502,7 @@
       "place": "KB국민은행 입금",
       "location": { "lat": 37.5665, "lng": 126.978 },
       "products": ["월급"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604010002,
@@ -514,7 +514,7 @@
       "place": "신촌 오피스텔",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["월세"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604020001,
@@ -526,7 +526,7 @@
       "place": "연세대학교 학생회관",
       "location": { "lat": 37.564, "lng": 126.939 },
       "products": ["김밥", "두유"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604020002,
@@ -538,7 +538,7 @@
       "place": "신촌역",
       "location": { "lat": 37.5551, "lng": 126.9368 },
       "products": ["티머니 충전"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604030001,
@@ -550,7 +550,7 @@
       "place": "Netflix",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["Netflix Premium"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604040001,
@@ -562,7 +562,7 @@
       "place": "신촌 분식집",
       "location": { "lat": 37.5561, "lng": 126.9371 },
       "products": ["떡볶이", "튀김", "음료"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604050001,
@@ -574,7 +574,7 @@
       "place": "오피스텔 관리사무소",
       "location": { "lat": 37.5598, "lng": 126.9368 },
       "products": ["관리비"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604050002,
@@ -586,7 +586,7 @@
       "place": "아트박스 신촌점",
       "location": { "lat": 37.5562, "lng": 126.9382 },
       "products": ["카드"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604060001,
@@ -598,7 +598,7 @@
       "place": "올리브영 신촌점",
       "location": { "lat": 37.5569, "lng": 126.9374 },
       "products": ["손목 보호대"],
-      "receiptId": 202604060901
+      "receiptRef": 202604060901
     },
     {
       "id": 202604060002,
@@ -610,7 +610,7 @@
       "place": "세브란스병원",
       "location": { "lat": 37.5635, "lng": 126.9392 },
       "products": ["외래 진료"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604070001,
@@ -622,7 +622,7 @@
       "place": "홈플러스 익스프레스",
       "location": { "lat": 37.5584, "lng": 126.9362 },
       "products": ["샐러드", "과일", "요거트"],
-      "receiptId": null
+      "receiptRef": ""
     },
     {
       "id": 202604080001,
@@ -634,7 +634,7 @@
       "place": "스타벅스 강남역점",
       "location": { "lat": 37.4979, "lng": 127.0276 },
       "products": ["카페라떼", "샌드위치"],
-      "receiptId": 202604080901
+      "receiptRef": 202604080901
     },
     {
       "id": 202604080002,
@@ -646,7 +646,7 @@
       "place": "카카오T",
       "location": { "lat": 37.5583, "lng": 126.9369 },
       "products": ["택시"],
-      "receiptId": null
+      "receiptRef": ""
     }
   ],
   "receipts": [
