@@ -4,8 +4,10 @@ import axios from 'axios';
 
 export const useReceiptStore = defineStore('receipt', () => {
   const BASEURI = '/api/receiptDraft';
+  const RECEIPTURI = '/api/receipts';
   const UPLOAD_URI = 'http://localhost:3001/upload';
   const receiptDraft = ref(null);
+  const receipts = ref([]);
 
   //임시 영수증 조회
   const fetchReceiptDraft = async () => {
@@ -16,6 +18,18 @@ export const useReceiptStore = defineStore('receipt', () => {
     } catch (e) {
       console.log(e);
       console.error('receiptDraft 조회 실패:', e);
+      throw e;
+    }
+  };
+
+  // 임시 영수증을 진짜 영수증으로 저장
+  const addReceipt = async (newReceipt) => {
+    try {
+      const response = await axios.post(RECEIPTURI, newReceipt);
+      receipts.value.push(response.data);
+      return response.data;
+    } catch (e) {
+      console.error('영수증 추가 실패:', e);
       throw e;
     }
   };
@@ -65,8 +79,10 @@ export const useReceiptStore = defineStore('receipt', () => {
   };
 
   return {
+    receipts,
     receiptDraft,
     fetchReceiptDraft,
+    addReceipt,
     saveReceiptDraft,
     clearReceiptDraft,
     uploadReceiptImage,

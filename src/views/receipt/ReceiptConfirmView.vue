@@ -11,7 +11,7 @@
 
       <div class="receipt-form-panel">
         <div class="form-group">
-          <label>날짜</label>
+          <label>날짜 <span style="color: red">*</span></label>
           <DatePicker
             v-model="receiptDraft.aiResult.date"
             :max-date="todayString"
@@ -19,59 +19,74 @@
         </div>
 
         <div class="form-group">
-          <label>구매 장소</label>
+          <label>금액 <span style="color: red">*</span></label>
           <input
+            ref="priceInputRef"
+            :value="priceInput"
+            type="text"
+            inputmode="numeric"
+            placeholder="숫자만 입력해주세요."
+            :class="{ 'input-error': invalidField === 'price' }"
+            @input="handlePriceInput"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>카테고리 <span style="color: red">*</span></label>
+          <select v-model="receiptDraft.aiResult.categoryId" type="text">
+            <option
+              v-for="category in expenseCategories"
+              :key="category.id"
+              :value="category.id"
+            >
+              {{ category.labelKo }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>장소 <span style="color: red">*</span></label>
+          <input
+            ref="placeInputRef"
             v-model.trim="receiptDraft.aiResult.place"
             type="text"
+            :class="{ 'input-error': invalidField === 'place' }"
             placeholder="ex) 씨유 세종대후문점"
           />
         </div>
 
         <div class="form-group">
-          <label>구매 항목</label>
+          <label>품목 <span style="color: red">*</span></label>
           <input
+            ref="productsInputRef"
             :value="productsText"
             type="text"
+            :class="{ 'input-error': invalidField === 'products' }"
             placeholder="쉼표(,)로 구분해서 입력해주세요."
             @input="handleProductsInput"
           />
         </div>
 
         <div class="form-group">
-          <label>카테고리</label>
-          <input v-model="receiptDraft.aiResult.categoryId" type="text" />
-        </div>
-
-        <div class="form-group">
           <label>메모</label>
           <input
+            ref="memoInputRef"
             v-model="receiptDraft.aiResult.memo"
             placeholder="구매 내용을 입력해주세요."
             type="text"
           />
         </div>
 
-        <div class="form-group">
-          <label>총 가격</label>
-          <input
-            :value="priceInput"
-            type="text"
-            inputmode="numeric"
-            placeholder="숫자만 입력해주세요."
-            @input="handlePriceInput"
-          />
-        </div>
         <p v-if="formErrorMessage" class="form-error-message">
           {{ formErrorMessage }}
         </p>
         <div class="button-group">
-          <button class="cancel-button" @click="goBack">취소하기</button>
+          <button class="cancel-button" @click="goBack">취소</button>
           <button
             class="submit-button"
-            :disabled="!isFormValid || isSaving"
+            :disabled="isSaving"
             @click="receiptSave"
           >
-            {{ isSaving ? '등록 중...' : '등록하기' }}
+            {{ isSaving ? '등록 중...' : '등록' }}
           </button>
         </div>
       </div>
@@ -83,18 +98,30 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useReceiptStore } from '@/stores/receipt';
-import { getLocationByPlace } from '@/utils/kakaoMap';
+import { useRouter } from 'vue-router';
 import DatePicker from '@/components/DatePicker.vue';
+import { getLocationByPlace } from '@/utils/kakaoMap';
+import { useReceiptStore } from '@/stores/receipt';
+import { useTransactionsStore } from '@/stores/transactions';
+import { useCategoryStore } from '@/stores/category';
 
-const route = useRoute();
 const router = useRouter();
+
+const priceInputRef = ref(null);
+const categorySelectRef = ref(null);
+const placeInputRef = ref(null);
+const productsInputRef = ref(null);
+const memoInputRef = ref(null);
+
 const receiptStore = useReceiptStore();
+const transactionsStore = useTransactionsStore();
+const categoryStore = useCategoryStore();
 
 const receiptDraft = ref(null);
 const isSaving = ref(false);
 const formErrorMessage = ref('');
+const invalidField = ref('');
+
 //날짜
 const todayString = computed(() => {
   const today = new Date();
@@ -102,6 +129,12 @@ const todayString = computed(() => {
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+});
+//카테고리
+categoryStore.fetchCategories();
+
+const expenseCategories = computed(() => {
+  return categoryStore.categories.filter((c) => c.type === 'expense');
 });
 // 상품목록
 const productsText = computed(() => {
@@ -120,20 +153,68 @@ const normalizedProducts = computed(() => {
     .map((i) => i.trim())
     .filter(Boolean);
 });
-const isFormValid = computed(() => {
-  if (!receiptDraft.value.aiResult) return false;
+const setInvalidField = (fieldName, el) => {
+  invalidField.value = fieldName;
+  focusField(el);
+};
 
-  const ai = receiptDraft.value.aiResult;
-  return (
-    !!ai.date &&
-    !!ai.place?.trim() &&
-    !!ai.categoryId?.trim() &&
-    !!ai.memo?.trim() &&
-    normalizedProducts.value.length > 0 &&
-    String(ai.price).trim() !== '' &&
-    Number(ai.price) > 0
-  );
-});
+const clearFieldError = (fieldName) => {
+  if (invalidField.value === fieldName) {
+    invalidField.value = '';
+    formErrorMessage.value = '';
+  }
+};
+
+//저장 버튼 클릭시 유효성 검사하기
+const focusField = (el) => {
+  if (!el) return;
+  el.focus();
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+const validateFormAndFocus = () => {
+  const ai = receiptDraft.value?.aiResult;
+  if (!ai) return false;
+
+  if (!ai.date) {
+    formErrorMessage.value = '날짜를 입력해주세요.';
+    invalidField.value = 'date';
+    return false;
+  }
+
+  if (String(ai.price).trim() === '' || Number(ai.price) <= 0) {
+    formErrorMessage.value = '금액을 입력해주세요.';
+    setInvalidField('price', priceInputRef.value);
+    return false;
+  }
+
+  if (!ai.categoryId?.trim()) {
+    formErrorMessage.value = '카테고리를 선택해주세요.';
+    return false;
+  }
+
+  if (!ai.place?.trim()) {
+    formErrorMessage.value = '장소를 입력해주세요.';
+    setInvalidField('place', placeInputRef.value);
+    return false;
+  }
+
+  if (normalizedProducts.value.length === 0) {
+    formErrorMessage.value = '품목을 입력해주세요.';
+    setInvalidField('products', productsInputRef.value);
+    return false;
+  }
+
+  if (!ai.memo?.trim()) {
+    formErrorMessage.value = '메모를 입력해주세요.';
+    return false;
+  }
+
+  formErrorMessage.value = '';
+  invalidField.value = '';
+  return true;
+};
+
 const handleProductsInput = (event) => {
   if (!receiptDraft.value) return;
 
@@ -141,6 +222,8 @@ const handleProductsInput = (event) => {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
+
+  clearFieldError('products');
 };
 
 const handlePriceInput = (event) => {
@@ -149,6 +232,7 @@ const handlePriceInput = (event) => {
   const onlyNumbers = event.target.value.replace(/[^0-9]/g, '');
   receiptDraft.value.aiResult.price =
     onlyNumbers === '' ? '' : Number(onlyNumbers);
+  clearFieldError('price');
 };
 
 const fetchReceiptDraft = async () => {
@@ -170,14 +254,13 @@ const fetchReceiptDraft = async () => {
 const goBack = () => {
   router.push('/receipt');
 };
-
+// 데이터 저장
 const receiptSave = async () => {
   if (!receiptDraft.value) return;
 
   formErrorMessage.value = '';
 
-  if (!isFormValid.value) {
-    formErrorMessage.value = '모든 항목을 입력해야 등록할 수 있어요.';
+  if (!validateFormAndFocus()) {
     return;
   }
 
@@ -186,12 +269,12 @@ const receiptSave = async () => {
   try {
     const ai = receiptDraft.value.aiResult;
 
+    // 위도 경도 없으면 추가해주기
     if (!ai.location?.lat || !ai.location?.lng) {
       const location = await getLocationByPlace(ai.place);
-
       ai.location = location;
     }
-    console.log(ai.location);
+
     const payload = {
       ...receiptDraft.value,
       aiResult: {
@@ -200,18 +283,48 @@ const receiptSave = async () => {
         products: normalizedProducts.value,
       },
     };
-    console.log(payload);
+
     if (!payload.aiResult.location?.lat || !payload.aiResult.location?.lng) {
-      throw new Error(
-        '구매 장소의 좌표를 찾을 수 없습니다. 다른 장소를 적어주세요.',
-      );
+      payload.aiResult.location.lat = '';
+      payload.aiResult.location.lng = '';
     }
-    // 데이터 저장
-    
+    const newTrans = {
+      date: payload.aiResult.date,
+      categoryId: payload.aiResult.categoryId,
+      memo: payload.aiResult.memo,
+      price: Number(payload.aiResult.price),
+      type: 'expense',
+      place: payload.aiResult.place,
+      location: payload.aiResult.location,
+      products: payload.aiResult.products,
+      receiptId: payload.id ?? '',
+    };
+    // 거래 저장
+    const trans = await transactionsStore.addTransactions(newTrans);
+    // 영수증 저장
+    // 한국시간으로 변경
+    const getKoreaISOString = () => {
+      const now = new Date();
+      const koreaTime = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      return koreaTime.toISOString().replace('Z', '+09:00');
+    };
+    const newReceipt = {
+      id: payload.id ?? new Date().getTime(),
+      transactionId: trans.id,
+      imageUrl: payload.imageUrl,
+      ocrRawText: payload.ocrRawText ?? '',
+      createdAt: getKoreaISOString(),
+    };
+
+    const savedReceipt = await receiptStore.addReceipt(newReceipt);
+    console.log(savedReceipt);
+    // 임시 영수증 삭제
+    await receiptStore.clearReceiptDraft();
+    receiptDraft.value = null;
 
     // 페이지 이동
-
-    // 임시 영수증 삭제
+    alert('저장이 완료되었습니다.');
+    router.push(`/transactions/${savedReceipt.transactionId}`);
   } catch (error) {
     console.error(error);
     formErrorMessage.value = error.message || '저장 중 오류가 발생했습니다.';
@@ -259,8 +372,8 @@ onMounted(() => {
 .receipt-form-panel {
   width: 42%;
   max-width: 420px;
-  background-color: #f3f3f3;
-  border-radius: 10px;
+  background-color: #f1f1f3;
+  border-radius: 17px;
   padding: 1.2rem;
   box-sizing: border-box;
 }
@@ -293,6 +406,17 @@ onMounted(() => {
   color: #9aa0a6;
 }
 
+.form-group select {
+  height: 42px;
+  border: 1px solid #bcbcbc;
+  border-radius: 6px;
+  padding: 0 0.8rem;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  background-color: #fff;
+  color: black;
+}
+
 .form-error-message {
   margin: 6px 0 0;
   color: #d9534f;
@@ -300,30 +424,50 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.input-error {
+  border: 1px solid #d9534f !important;
+  box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.12);
+}
+
+.input-error:focus {
+  border: 1px solid #d9534f !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.16);
+}
+
 .button-group {
   display: flex;
+  width: 100%;
   justify-content: center;
   gap: 1rem;
   margin-top: 1rem;
+  font-size: 16px;
 }
 
 .cancel-button,
 .submit-button {
-  min-width: 90px;
+  width: 90%;
+  min-width: 40px;
   height: 40px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   color: white;
   font-weight: 700;
   cursor: pointer;
 }
 
 .cancel-button {
-  background-color: #d97b87;
+  background-color: #666;
+}
+.cancel-buttont:hover {
+  background-color: #e0e0e0;
 }
 
 .submit-button {
-  background-color: #4e8780;
+  background-color: #5d6d97;
+}
+.submit-button:hover {
+  background-color: 5d6d97;
 }
 
 .submit-button:disabled {
