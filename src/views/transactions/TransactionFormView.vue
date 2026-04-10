@@ -112,6 +112,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoryStore } from '@/stores/category';
+import { getLocationByPlace } from '@/utils/kakaoMap';
 
 // ===== Store 연결 =====
 const transactionsStore = useTransactionsStore();
@@ -129,7 +130,7 @@ const form = ref({
   place: '', // 장소
   products: '', // 품목 (일단 문자열로 받고, 나중에 배열로 변환)
   memo: '', // 메모
-  location: '',
+  location: {},
   receiptRef: '',
 });
 
@@ -207,7 +208,7 @@ const handleSave = async () => {
     //     : form.value.products
     //       ? form.value.products.split(',').map((p) => p.trim())
     //       : [],
-    location: form.value.location,
+    location: await getLocationByPlace(form.value.place),
     receiptRef: form.value.receiptRef,
   };
 

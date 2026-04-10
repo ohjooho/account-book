@@ -117,6 +117,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoryStore } from '@/stores/category';
+import { getLocationByPlace } from '@/utils/kakaoMap';
 import axios from 'axios';
 
 // ===== Store 연결 =====
@@ -175,7 +176,7 @@ onMounted(async () => {
       ? transaction.products.join(', ')
       : '',
     memo: transaction.memo || '',
-    location: transaction.location || '',
+    location: transaction.location || {},
     receiptRef: transaction.receiptRef || '',
   };
 
@@ -265,7 +266,7 @@ const handleUpdate = async () => {
     //     : form.value.products
     //       ? form.value.products.split(',').map((p) => p.trim())
     //       : [],
-    location: form.value.location,
+    location: await getLocationByPlace(form.value.place),
     receiptRef: form.value.receiptRef,
   };
 
