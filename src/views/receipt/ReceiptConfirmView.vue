@@ -12,7 +12,10 @@
       <div class="receipt-form-panel">
         <div class="form-group">
           <label>날짜</label>
-          <input v-model="receiptDraft.aiResult.date" type="date" />
+          <DatePicker
+            v-model="receiptDraft.aiResult.date"
+            :max-date="todayString"
+          />
         </div>
 
         <div class="form-group">
@@ -83,6 +86,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useReceiptStore } from '@/stores/receipt';
 import { getLocationByPlace } from '@/utils/kakaoMap';
+import DatePicker from '@/components/DatePicker.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -91,6 +95,14 @@ const receiptStore = useReceiptStore();
 const receiptDraft = ref(null);
 const isSaving = ref(false);
 const formErrorMessage = ref('');
+//날짜
+const todayString = computed(() => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+});
 // 상품목록
 const productsText = computed(() => {
   if (!receiptDraft.value) return '';
@@ -195,6 +207,7 @@ const receiptSave = async () => {
       );
     }
     // 데이터 저장
+    
 
     // 페이지 이동
 
