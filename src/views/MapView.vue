@@ -7,29 +7,30 @@
     </div>
 
     <div class="map-board" @click="isFilterOpen = false">
-      <div class="date-pill" @click="isCalendarOpen = !isCalendarOpen">
-        <button class="date-arrow" @click.stop="moveDate(-1)">‹</button>
-        <span>{{ formattedSelectedDate }}</span>
-        <button class="date-arrow" @click.stop="moveDate(1)">›</button>
+      <div class="date-picker-wrap">
+        <DatePicker
+          v-model="selectedDateString"
+          :max-date="maxDateString"
+        />
       </div>
 
       <div class="filter-wrap">
         <button class="filter-toggle" @click.stop="isFilterOpen = !isFilterOpen" aria-label="filter">
-  <svg
-    class="filter-icon"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M7 10L12 15L17 10"
-      stroke="currentColor"
-      stroke-width="2.4"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
-</button>
+          <svg
+            class="filter-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7 10L12 15L17 10"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
 
         <div v-if="isFilterOpen" class="category-stack" @click.stop>
           <button
@@ -45,42 +46,13 @@
         </div>
       </div>
 
-      <div v-if="isCalendarOpen" class="calendar-card">
-        <div class="calendar-header">
-          <button class="calendar-nav" @click="moveMonth(-1)">‹</button>
-          <span>{{ monthLabel }}</span>
-          <button class="calendar-nav" @click="moveMonth(1)">›</button>
-        </div>
-
-        <div class="calendar-grid calendar-weekdays">
-          <span v-for="day in weekdayLabels" :key="day">{{ day }}</span>
-        </div>
-
-        <div class="calendar-grid calendar-days">
-          <button
-            v-for="day in calendarDays"
-            :key="day.key"
-            class="calendar-day"
-            :class="{
-              empty: !day.currentMonth,
-              selected: day.currentMonth && isSameDate(day.date, selectedDate),
-              future: day.currentMonth && day.isFuture
-            }"
-            :disabled="!day.currentMonth || day.isFuture"
-            @click="selectDate(day.date)"
-          >
-            {{ day.label }}
-          </button>
-        </div>
-      </div>
-
       <div ref="mapRef" class="map-area"></div>
 
       <div
-  v-if="selectedItem"
-  class="detail-card clickable"
-  @click="goToTransactionDetail"
->
+        v-if="selectedItem"
+        class="detail-card clickable"
+        @click="goToTransactionDetail"
+      >
         <div class="detail-top">{{ selectedItem.title }}</div>
 
         <div class="detail-body">
@@ -114,6 +86,7 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import DatePicker from '@/components/DatePicker.vue'
 import data2 from '../../data2.json'
 
 const router = useRouter()
@@ -123,11 +96,46 @@ const map = ref(null)
 const markers = ref([])
 const selectedCategory = ref('all')
 const selectedItem = ref(null)
-const isCalendarOpen = ref(false)
 const isFilterOpen = ref(false)
 const transactions = ref([])
 
-const weekdayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+function formatCurrency(value) {
+  return `₩${value.toLocaleString('ko-KR')}`
+}
+
+function formatDate(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function parseDateString(value) {
+  if (!value) return null
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+const sourceToday = startOfDay(new Date(data2.meta.currentDate))
+const today = ref(sourceToday)
+const selectedDate = ref(sourceToday)
+
+const selectedDateString = computed({
+  get() {
+    return formatDate(selectedDate.value)
+  },
+  set(value) {
+    const parsed = parseDateString(value)
+    if (!parsed) return
+    selectedDate.value = startOfDay(parsed)
+  }
+})
+
+const maxDateString = computed(() => formatDate(today.value))
 
 const categories = computed(() => {
   return [
@@ -140,26 +148,6 @@ const categories = computed(() => {
     }))
   ]
 })
-
-function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
-const sourceToday = startOfDay(new Date(data2.meta.currentDate))
-const today = ref(sourceToday)
-const selectedDate = ref(sourceToday)
-const currentMonth = ref(new Date(sourceToday.getFullYear(), sourceToday.getMonth(), 1))
-
-function formatCurrency(value) {
-  return `₩${value.toLocaleString('ko-KR')}`
-}
-
-function formatDate(date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
 
 function getCategoryInfo(categoryId) {
   return data2.categories.find((category) => category.id === categoryId)
@@ -218,19 +206,6 @@ function initializeTransactions() {
   transactions.value = mapTransactionsFromData2()
 }
 
-const formattedSelectedDate = computed(() => {
-  const year = selectedDate.value.getFullYear()
-  const month = selectedDate.value.getMonth() + 1
-  const day = selectedDate.value.getDate()
-  return `${year}년 ${month}월 ${day}일`
-})
-
-const monthLabel = computed(() => {
-  const year = currentMonth.value.getFullYear()
-  const month = currentMonth.value.toLocaleString('en-US', { month: 'long' })
-  return `${month} ${year}`
-})
-
 const filteredTransactions = computed(() => {
   const selected = formatDate(selectedDate.value)
 
@@ -242,87 +217,6 @@ const filteredTransactions = computed(() => {
     return sameDate && sameCategory
   })
 })
-
-const calendarDays = computed(() => {
-  const year = currentMonth.value.getFullYear()
-  const month = currentMonth.value.getMonth()
-
-  const firstDay = new Date(year, month, 1)
-  const lastDay = new Date(year, month + 1, 0)
-
-  const startWeekday = firstDay.getDay()
-  const totalDays = lastDay.getDate()
-
-  const days = []
-
-  for (let i = 0; i < startWeekday; i += 1) {
-    days.push({
-      key: `empty-${i}`,
-      label: '',
-      currentMonth: false,
-      date: null,
-      isFuture: false
-    })
-  }
-
-  for (let day = 1; day <= totalDays; day += 1) {
-    const date = new Date(year, month, day)
-    days.push({
-      key: formatDate(date),
-      label: day,
-      currentMonth: true,
-      date,
-      isFuture: date > today.value
-    })
-  }
-
-  return days
-})
-
-function isSameDate(a, b) {
-  if (!a || !b) return false
-  return formatDate(a) === formatDate(b)
-}
-
-function selectDate(date) {
-  if (!date || date > today.value) return
-  selectedDate.value = new Date(date)
-  currentMonth.value = new Date(date.getFullYear(), date.getMonth(), 1)
-  isCalendarOpen.value = false
-}
-
-function moveDate(direction) {
-  const next = new Date(selectedDate.value)
-  next.setDate(next.getDate() + direction)
-
-  if (next > today.value) {
-    selectedDate.value = new Date(today.value)
-    currentMonth.value = new Date(today.value.getFullYear(), today.value.getMonth(), 1)
-    isCalendarOpen.value = false
-    return
-  }
-
-  selectedDate.value = next
-  currentMonth.value = new Date(next.getFullYear(), next.getMonth(), 1)
-  isCalendarOpen.value = false
-}
-
-function moveMonth(direction) {
-  const nextMonth = new Date(
-    currentMonth.value.getFullYear(),
-    currentMonth.value.getMonth() + direction,
-    1
-  )
-
-  const todayMonth = new Date(today.value.getFullYear(), today.value.getMonth(), 1)
-
-  if (nextMonth > todayMonth) {
-    currentMonth.value = todayMonth
-    return
-  }
-
-  currentMonth.value = nextMonth
-}
 
 function goToTransactionDetail() {
   if (!selectedItem.value?.id) return
@@ -365,6 +259,29 @@ function clearMarkers() {
   markers.value = []
 }
 
+function getAddressFromCoords(lat, lng) {
+  return new Promise((resolve) => {
+    if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+      resolve('')
+      return
+    }
+
+    const geocoder = new window.kakao.maps.services.Geocoder()
+    const coord = new window.kakao.maps.LatLng(lat, lng)
+
+    geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK && result.length > 0) {
+        const roadAddress = result[0].road_address?.address_name
+        const jibunAddress = result[0].address?.address_name
+        resolve(roadAddress || jibunAddress || '')
+        return
+      }
+
+      resolve('')
+    })
+  })
+}
+
 function renderMarkers() {
   if (!map.value || !window.kakao || !window.kakao.maps) return
 
@@ -388,8 +305,14 @@ function renderMarkers() {
       image: createMarkerImage(item.category)
     })
 
-    window.kakao.maps.event.addListener(marker, 'click', () => {
-      selectedItem.value = item
+    window.kakao.maps.event.addListener(marker, 'click', async () => {
+      const realAddress = await getAddressFromCoords(item.lat, item.lng)
+
+      selectedItem.value = {
+        ...item,
+        address: realAddress || item.address || item.title
+      }
+
       map.value.panTo(position)
     })
 
@@ -397,7 +320,12 @@ function renderMarkers() {
     bounds.extend(position)
 
     if (index === 0) {
-      selectedItem.value = item
+      getAddressFromCoords(item.lat, item.lng).then((realAddress) => {
+        selectedItem.value = {
+          ...item,
+          address: realAddress || item.address || item.title
+        }
+      })
     }
   })
 
@@ -433,7 +361,7 @@ function loadKakaoScript() {
     const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
 
     script.src =
-      `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`
+      `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`
     script.onload = () => resolve()
     script.onerror = () => reject(new Error('Kakao SDK load failed'))
     document.head.appendChild(script)
@@ -514,26 +442,36 @@ onMounted(async () => {
   height: 100%;
 }
 
-.date-pill {
+.date-picker-wrap {
   position: absolute;
   top: 24px;
   left: 24px;
   z-index: 10;
+  width: 220px;
+}
+
+:deep(.date-picker) {
+  width: 100%;
+}
+
+:deep(.date-pill) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   height: 44px;
+  width: 100%;
   padding: 0 14px;
   background: rgba(68, 68, 72, 0.9);
   color: #ffffff;
   border-radius: 17px;
+  border: none;
   font-size: 16px;
   font-weight: 600;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
   box-sizing: border-box;
 }
 
-.date-arrow {
+:deep(.date-arrow) {
   width: 24px;
   height: 24px;
   border: 0;
@@ -543,11 +481,11 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.calendar-card {
+:deep(.calendar-card) {
   position: absolute;
-  top: 76px;
-  left: 24px;
-  z-index: 10;
+  top: 52px;
+  left: 0;
+  z-index: 20;
   width: 420px;
   min-width: 320px;
   padding: 12px;
@@ -555,9 +493,10 @@ onMounted(async () => {
   border: 1px solid #d9d9df;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
 }
 
-.calendar-header {
+:deep(.calendar-header) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -566,7 +505,7 @@ onMounted(async () => {
   color: #666666;
 }
 
-.calendar-nav {
+:deep(.calendar-nav) {
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -574,24 +513,36 @@ onMounted(async () => {
   color: #111111;
 }
 
-.calendar-grid {
+:deep(.calendar-title) {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #111111;
+  font-weight: 600;
+  padding: 4px 8px;
+}
+
+:deep(.calendar-grid) {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
 }
 
-.calendar-weekdays {
+:deep(.calendar-weekdays) {
   margin-bottom: 8px;
   font-size: 12px;
   color: #666666;
   text-align: center;
 }
 
-.calendar-days {
+:deep(.calendar-days) {
   font-size: 14px;
 }
 
-.calendar-day {
+:deep(.calendar-day) {
   width: 100%;
   aspect-ratio: 1 / 1;
   border: 0;
@@ -602,19 +553,42 @@ onMounted(async () => {
   color: #111111;
 }
 
-.calendar-day.selected {
+:deep(.calendar-day.selected) {
   background: #111111;
   color: #ffffff;
   font-weight: 600;
 }
 
-.calendar-day.empty {
+:deep(.calendar-day.empty) {
   visibility: hidden;
 }
 
-.calendar-day.future {
+:deep(.calendar-day.future) {
   color: #c3c3c8;
   cursor: not-allowed;
+}
+
+:deep(.year-grid) {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px 4px 4px;
+}
+
+:deep(.year-button) {
+  height: 48px;
+  border: 1px solid #d9d9df;
+  border-radius: 10px;
+  background: #fff;
+  color: #222;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+:deep(.year-button.selected) {
+  background: #222;
+  color: #fff;
 }
 
 .filter-wrap {
@@ -806,15 +780,15 @@ onMounted(async () => {
     padding: 16px;
   }
 
-  .calendar-card {
+  :deep(.calendar-card) {
     width: 320px;
   }
 
   .detail-card {
-  left: 16px;
-  right: 16px;
-  width: auto;
-  transform: none;
-}
+    left: 16px;
+    right: 16px;
+    width: auto;
+    transform: none;
+  }
 }
 </style>
