@@ -58,7 +58,7 @@
         <div class="detail-body">
           <div class="detail-left">
             <div class="detail-date">{{ selectedItem.date }}</div>
-            <div class="detail-time">{{ selectedItem.time }}</div>
+            
             <div
               class="detail-category"
               :style="{ color: selectedItem.categoryColor }"
@@ -153,13 +153,6 @@ function getCategoryInfo(categoryId) {
   return data2.categories.find((category) => category.id === categoryId)
 }
 
-function formatTimeFromId(id) {
-  const str = String(id)
-  const tail = str.slice(-4)
-  const hour = Number(tail.slice(0, 2)) % 24
-  const minute = Number(tail.slice(2, 4)) % 60
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
-}
 
 function getMarkerIcon(item) {
   if (item.type === 'income') return '₩'
@@ -190,7 +183,6 @@ function mapTransactionsFromData2() {
       amount: formatCurrency(item.price),
       amountValue: item.price,
       date: item.date,
-      time: formatTimeFromId(item.id),
       address: item.place || '',
       lat: item.location?.lat ?? 37.5665,
       lng: item.location?.lng ?? 126.978,
@@ -727,8 +719,7 @@ onMounted(async () => {
   text-align: center;
 }
 
-.detail-date,
-.detail-time {
+.detail-date {
   font-size: 14px;
   font-weight: 400;
   color: #111111;
