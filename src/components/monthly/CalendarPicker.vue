@@ -165,10 +165,11 @@ const onConfirm = () => {
 }
 
 .calendar-container { 
-  background: #fff; 
-  border-radius: 16px; 
+  background: rgba(255, 255, 255, 0.98); 
+  border-radius: 17px; 
   width: 320px; 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+  border: 1px solid #d9d9df;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12); 
   overflow: hidden; 
 }
 
@@ -176,22 +177,22 @@ const onConfirm = () => {
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
-  padding: 15px 10px; 
+  padding: 12px 10px; 
   border-bottom: 1px solid #eee; 
 }
 
 .calendar-header h3 { 
   margin: 0; 
-  font-size: 16px; 
-  font-weight: 700; 
-  color: #333; 
+  font-size: 12px; 
+  font-weight: 400;
+  color: #666; 
 }
 
 .nav-btn { 
   background: none; 
   border: none; 
-  font-size: 18px; 
-  color: #999; 
+  font-size: 16px; 
+  color: #111; 
   cursor: pointer; 
   padding: 0 10px; 
 }
@@ -225,8 +226,8 @@ const onConfirm = () => {
 
 /* 날짜 기본 */
 .calendar-day { 
-  font-size: 13px; 
-  color: #333; 
+  font-size: 14px; 
+  color: #111; 
   height: 36px; 
   display: flex; 
   justify-content: center; 
@@ -236,8 +237,14 @@ const onConfirm = () => {
   width: 100%;
   box-sizing: border-box;
 }
+
 .calendar-day.empty { cursor: default; }
-.calendar-day:not(.empty, .is-selected, .range-start, .range-end, .in-range):hover { background-color: #f5f5f5; border-radius: 50%; }
+
+/* 호버 */
+.calendar-day:not(.empty, .is-selected, .range-start, .range-end, .in-range):hover { 
+  background-color: #f0f0f0; 
+  border-radius: 10px; 
+}
 
 /* day-text 기본 - 항상 36x36 고정 */
 .day-text {
@@ -246,47 +253,93 @@ const onConfirm = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 10px;  /* 둥근 정사각형 */
   flex-shrink: 0;
 }
 
 /* 단일 선택 */
 .is-selected .day-text { 
-  background-color: #007bff;
+  background-color: #111;  /* 파랑 → 검정 */
   color: #fff;
   font-weight: bold; 
 }
 
-/* 범위 중간 */
-.in-range { background-color: #e3f2fd; }
-.in-range .day-text { color: #007bff; }
+/* 형광펜 범위 */
+.in-range { 
+  background-color: #e8e8e8;  /* 연회색 */
+}
+.in-range .day-text { 
+  color: #111; 
+}
+
+/* 시작일 배경 */
+.range-start { 
+  background: linear-gradient(to right, transparent 50%, #e8e8e8 50%);
+}
 
 /* 시작일 */
-.range-start { 
-  background: linear-gradient(to right, transparent 50%, #e3f2fd 50%);
-}
 .range-start .day-text { 
-  background-color: #007bff; 
+  background-color: #111;  /* 검정으로 변경 */
   color: #fff;
   font-weight: bold; 
+}
+
+/* 끝일 배경 */
+.range-end { 
+  background: linear-gradient(to left, transparent 50%, #e8e8e8 50%);
 }
 
 /* 끝일 */
-.range-end { 
-  background: linear-gradient(to left, transparent 50%, #e3f2fd 50%);
-}
 .range-end .day-text { 
-  background-color: #007bff;
+  background-color: #111;  /* 검정으로 변경 */
   color: #fff;
   font-weight: bold; 
 }
 
 .is-today .day-text { position: relative; }
-.is-today .day-text::after { content: ''; position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #007bff; border-radius: 50%; }
 
-.calendar-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 12px; border-top: 1px solid #eee; }
-.footer-btn { padding: 8px 16px; border-radius: 8px; border: none; font-size: 13px; cursor: pointer; font-weight: 600; }
-.footer-btn.cancel { background: #f1f3f5; color: #495057; }
-.footer-btn.confirm { background: #007bff; color: #fff; }
-.footer-btn.confirm:disabled { background: #ccc; cursor: not-allowed; }
+.is-today .day-text::after { 
+content: ''; 
+position: absolute; 
+bottom: -3px; 
+left: 50%; 
+transform: translateX(-50%); 
+width: 4px; 
+height: 4px; 
+background-color: #007bff; 
+border-radius: 50%; 
+}
+
+.calendar-footer { 
+display: flex; 
+justify-content: flex-end; 
+gap: 8px; 
+padding: 12px; 
+border-top: 1px solid #eee; 
+}
+
+.footer-btn { 
+padding: 8px 16px; 
+border-radius: 8px; 
+border: none; 
+font-size: 13px; 
+cursor: pointer; 
+font-weight: 600; 
+}
+
+.footer-btn.cancel { 
+background: #f1f3f5; 
+color: #495057; 
+}
+
+/* 확인 버튼 */
+.footer-btn.confirm { 
+  background: #111; 
+  color: #fff; 
+}
+
+.footer-btn.confirm:disabled { 
+  background: #ccc; 
+  cursor: not-allowed; 
+}
 </style>
