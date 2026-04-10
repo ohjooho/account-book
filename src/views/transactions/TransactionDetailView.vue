@@ -8,7 +8,6 @@
         <label class="form-label">영수증</label>
         <div class="receipt-content">
           <img
-            src="@/penguin.jpg"
             :src="receipt.imageUrl"
             :alt="`영수증 ${receipt.id}`"
             class="receipt-image"
@@ -176,6 +175,8 @@ onMounted(async () => {
       ? transaction.products.join(', ')
       : '',
     memo: transaction.memo || '',
+    location: transaction.location || '',
+    receiptRef: transaction.receiptRef || '',
   };
 
   // ===== 영수증 불러오기 (receiptRef가 있을 때만) =====
@@ -203,16 +204,90 @@ const goBack = () => {
   router.push('/transactions');
 };
 
-// 수정
-const handleUpdate = () => {
-  console.log('수정할 데이터:', form.value);
+// 수정 버튼
+const handleUpdate = async () => {
+  console.log('현재 라우트 파라미터 ID: ', route.params.id);
+
+  // 유효성 검사
+
+  // 날짜 필수
+  if (!form.value.date) {
+    alert('날짜를 입력해주세요.');
+    return;
+  }
+
+  // 금액 필수
+  if (!form.value.price) {
+    alert('금액을 입력해주세요.');
+    return;
+  }
+
+  // 지출일 때는 카테고리도 필수
+  if (form.value.type === 'expense' && !form.value.categoryId) {
+    alert('카테고리를 선택해주세요.');
+    return;
+  }
+
+  // 지출일 때는 장소도 필수
+  if (form.value.type === 'expense' && !form.value.place) {
+    alert('장소를 입력해주세요.');
+    return;
+  }
+
+  // 지출일 때는 품목도 필수
+  if (form.value.type === 'expense' && !form.value.products) {
+    alert('품목을 입력해주세요.');
+    return;
+  }
+
+  // 수정 확인
+  if (!confirm('수정된 내용을 저장하시겠습니까?')) {
+    return;
+  }
+
+  // ===== 데이터 가공 =====
+  const newTransaction = {
+    type: form.value.type,
+    date: form.value.date,
+    price: Number(form.value.price),
+    categoryId: form.value.type === 'income' ? 'income' : form.value.categoryId,
+    memo: form.value.memo,
+    place: form.value.place,
+    // 수입일 때 저장 안되게 할 경우
+    // place: form.value.type === 'income' ? '' : form.value.place,
+    products: form.value.products
+      ? form.value.products.split(',').map((p) => p.trim())
+      : [],
+    // 수입일 때 저장 안되게 할 경우
+    // products:
+    //   form.value.type === 'income'
+    //     ? []
+    //     : form.value.products
+    //       ? form.value.products.split(',').map((p) => p.trim())
+    //       : [],
+    location: form.value.location,
+    receiptRef: form.value.receiptRef,
+  };
+
+  // 수정 실행
+  try {
+    const idToUpdate = route.params.id;
+    console.log('수정 요청을 보낼 ID:', idToUpdate);
+
+    await transactionsStore.updateTransactions(idToUpdate, newTransaction);
+    alert('거래 정보가 성공적으로 수정되었습니다.');
+    router.push('/transactions');
+  } catch (e) {
+    alert('수정에 실패했습니다. 다시 시도해주세요.');
+    console.error('수정 에러:', e);
+  }
 };
 
 // 삭제 버튼
 const handleDelete = async () => {
   console.log('현재 라우트 파라미터 ID: ', route.params.id);
   // 삭제 확인
-  if (!confirm('정말 이 거래를 삭제하시겠습니까?')) {
+  if (!confirm('거래 내역을 삭제하시겠습니까?')) {
     return;
   }
 
@@ -222,7 +297,7 @@ const handleDelete = async () => {
     console.log('삭제 요청을 보낼 ID:', idToDelete);
 
     await transactionsStore.deleteTransactions(idToDelete);
-    alert('거래가 성공적으로 삭제되었습니다.');
+    alert('거래 내역이 성공적으로 삭제되었습니다.');
     router.push('/transactions');
   } catch (e) {
     alert('삭제에 실패했습니다. 다시 시도해주세요.');

@@ -129,6 +129,8 @@ const form = ref({
   place: '', // 장소
   products: '', // 품목 (일단 문자열로 받고, 나중에 배열로 변환)
   memo: '', // 메모
+  location: '',
+  receiptRef: '',
 });
 
 // ===== 카테고리 불러오기 =====
@@ -205,8 +207,8 @@ const handleSave = async () => {
     //     : form.value.products
     //       ? form.value.products.split(',').map((p) => p.trim())
     //       : [],
-    location: null,
-    receiptRef: '',
+    location: form.value.location,
+    receiptRef: form.value.receiptRef,
   };
 
   // ===== 저장 및 목록 페이지로 이동 =====
