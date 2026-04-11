@@ -162,19 +162,6 @@ const categoryStore = useCategoryStore();
 // ===== 라우터 =====
 const router = useRouter();
 
-// ===== 폼 데이터 =====
-const form = ref({
-  type: 'income', // 'income' 또는 'expense'
-  date: '', // 'YYYY-MM-DD' 형식
-  price: '', // 금액
-  categoryId: '', // 카테고리 id
-  place: '', // 장소
-  products: '', // 품목 (일단 문자열로 받고, 나중에 배열로 변환)
-  memo: '', // 메모
-  location: {},
-  receiptRef: '',
-});
-
 // 오늘 날짜를 'YYYY-MM-DD' 형식으로 계산 (미래 날짜 선택 방지용)
 const todayString = computed(() => {
   const t = new Date();
@@ -187,6 +174,19 @@ const todayString = computed(() => {
   const d = day < 10 ? '0' + day : day;
 
   return `${year}-${m}-${d}`;
+});
+
+// ===== 폼 데이터 =====
+const form = ref({
+  type: 'income', // 'income' 또는 'expense'
+  date: todayString.value, // 'YYYY-MM-DD' 형식, 오늘 날짜
+  price: '', // 금액
+  categoryId: '', // 카테고리 id
+  place: '', // 장소
+  products: '', // 품목 (일단 문자열로 받고, 나중에 배열로 변환)
+  memo: '', // 메모
+  location: {},
+  receiptRef: '',
 });
 
 // ===== 에러 상태 관리 변수 추가 =====
@@ -203,9 +203,33 @@ const productsInputRef = ref(null);
 // 포커스 함수
 const setInvalidField = (fieldName, el) => {
   invalidField.value = fieldName;
+
   if (el) {
-    el.focus();
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // 1. 일반적인 input/select 요소인 경우
+    if (typeof el.focus === 'function') {
+      el.focus();
+    }
+    // 2. DatePicker 같은 커스텀 컴포넌트인 경우 (내부의 클릭 가능한 요소를 찾음)
+    else if (el.$el) {
+      // 컴포넌트 루트($el) 안에서 실제 클릭 영역인 .date-pill 요소를 찾습니다.
+      const focusableElement =
+        el.$el.querySelector('.date-pill') ||
+        el.$el.querySelector('button, input, [tabindex]');
+
+      if (focusableElement) {
+        // 해당 요소에 포커스를 주기 위해 tabindex가 없다면 임시로 부여
+        if (!focusableElement.hasAttribute('tabindex')) {
+          focusableElement.setAttribute('tabindex', '0');
+        }
+        focusableElement.focus();
+      }
+    }
+
+    // 3. 스크롤 이동
+    const target = el.$el || el;
+    if (target.scrollIntoView) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 };
 
