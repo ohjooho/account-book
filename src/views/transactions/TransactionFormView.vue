@@ -5,7 +5,10 @@
     <div class="form-container">
       <!-- 분류 (수입/지출 토글) -->
       <div class="form-row">
-        <label class="form-label">분류</label>
+        <label class="form-label">
+          분류
+          <span style="color: red">*</span>
+        </label>
         <div class="type-toggle">
           <button
             type="button"
@@ -28,28 +31,53 @@
 
       <!-- 날짜 -->
       <div class="form-row">
-        <label class="form-label">날짜</label>
-        <input type="date" class="form-input" v-model="form.date" />
+        <label class="form-label">
+          날짜
+          <span style="color: red">*</span>
+        </label>
+        <input
+          type="date"
+          v-model="form.date"
+          ref="dateInputRef"
+          class="form-input"
+          :class="{ 'input-error': invalidField === 'date' }"
+          @input="handleInput('date')"
+        />
       </div>
 
       <!-- 금액 -->
       <div class="form-row">
-        <label class="form-label">금액</label>
+        <label class="form-label"
+          >금액
+          <span style="color: red">*</span>
+        </label>
         <input
-          type="number"
-          class="form-input"
-          placeholder="입력하세요"
+          type="text"
+          inputmode="numeric"
           v-model="form.price"
+          ref="priceInputRef"
+          placeholder="입력하세요"
+          class="form-input"
+          :class="{ 'input-error': invalidField === 'price' }"
+          @input="handleInput('price')"
         />
       </div>
-
-      <!-- 지출일 때만 보이는 필드들 -->
+      <!-- 지출일 때만 보이는 필드 -->
       <template v-if="form.type === 'expense'">
         <!-- 카테고리 -->
         <div class="form-row">
-          <label class="form-label">카테고리</label>
-          <select class="form-input" v-model="form.categoryId">
-            <option value="">선택하세요</option>
+          <label class="form-label"
+            >카테고리
+            <span style="color: red">*</span>
+          </label>
+          <select
+            v-model="form.categoryId"
+            ref="categorySelectRef"
+            class="form-input"
+            :class="{ 'input-error': invalidField === 'category' }"
+            @input="handleInput('category')"
+          >
+            <option value="" disabled selected>선택하세요</option>
             <option
               v-for="category in expenseCategories"
               :key="category.id"
@@ -59,29 +87,41 @@
             </option>
           </select>
         </div>
-
-        <!-- 장소 -->
-        <div class="form-row">
-          <label class="form-label">장소</label>
-          <input
-            type="text"
-            class="form-input"
-            placeholder="입력하세요"
-            v-model="form.place"
-          />
-        </div>
-
-        <!-- 품목 -->
-        <div class="form-row">
-          <label class="form-label">품목</label>
-          <input
-            type="text"
-            class="form-input"
-            placeholder="입력하세요 (쉼표로 구분)"
-            v-model="form.products"
-          />
-        </div>
       </template>
+
+      <!-- 장소 -->
+      <div class="form-row">
+        <label class="form-label"
+          >장소
+          <span style="color: red">*</span>
+        </label>
+        <input
+          type="text"
+          v-model.trim="form.place"
+          ref="placeInputRef"
+          placeholder="입력하세요"
+          class="form-input"
+          :class="{ 'input-error': invalidField === 'place' }"
+          @input="handleInput('place')"
+        />
+      </div>
+
+      <!-- 품목 -->
+      <div class="form-row">
+        <label class="form-label"
+          >품목
+          <span style="color: red">*</span>
+        </label>
+        <input
+          type="text"
+          v-model="form.products"
+          ref="productsInputRef"
+          placeholder="쉼표(,)로 구분해서 입력하세요"
+          class="form-input"
+          :class="{ 'input-error': invalidField === 'products' }"
+          @input="handleInput('products')"
+        />
+      </div>
 
       <!-- 메모 -->
       <div class="form-row">
@@ -91,6 +131,7 @@
           class="form-input"
           placeholder="입력하세요"
           v-model="form.memo"
+          @input="handleInput('memo')"
         />
       </div>
 
@@ -134,6 +175,86 @@ const form = ref({
   receiptRef: '',
 });
 
+// ===== 에러 상태 관리 변수 추가 =====
+const formErrorMessage = ref('');
+const invalidField = ref('');
+
+// ===== 각 필드 참조(Ref) 추가 (포커스용) =====
+const dateInputRef = ref(null);
+const priceInputRef = ref(null);
+const categorySelectRef = ref(null);
+const placeInputRef = ref(null);
+const productsInputRef = ref(null);
+
+// 포커스 함수
+const setInvalidField = (fieldName, el) => {
+  invalidField.value = fieldName;
+  if (el) {
+    el.focus();
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+};
+
+// 유효성 검사 함수 분리
+const validateForm = () => {
+  // 1. 날짜 체크
+  if (!form.value.date) {
+    formErrorMessage.value = '날짜를 입력해주세요.';
+    setInvalidField('date', dateInputRef.value);
+    return false;
+  }
+
+  // 2. 금액 체크
+  if (!form.value.price || Number(form.value.price) <= 0) {
+    formErrorMessage.value = '금액을 입력해주세요.';
+    setInvalidField('price', priceInputRef.value);
+    return false;
+  }
+
+  // 3. 지출 시 카테고리 체크
+  if (form.value.type === 'expense' && !form.value.categoryId) {
+    formErrorMessage.value = '카테고리를 선택해주세요.';
+    setInvalidField('category', categorySelectRef.value);
+    return false;
+  }
+
+  // 4. 장소 체크
+  if (!form.value.place?.trim()) {
+    formErrorMessage.value = '장소를 입력해주세요.';
+    setInvalidField('place', placeInputRef.value);
+    return false;
+  }
+
+  // 5. 품목 체크
+  if (!form.value.products?.trim()) {
+    formErrorMessage.value = '품목을 입력해주세요.';
+    setInvalidField('products', productsInputRef.value);
+    return false;
+  }
+
+  // 모두 통과 시 초기화
+  formErrorMessage.value = '';
+  invalidField.value = '';
+  return true;
+};
+
+// 에러 초기화 및 데이터 가공을 위한 통합 핸들러
+const handleInput = (fieldName) => {
+  // 1. 에러 상태 초기화 (입력 시작하면 빨간 테두리 해제)
+  if (invalidField.value === fieldName) {
+    invalidField.value = '';
+    formErrorMessage.value = '';
+  }
+
+  // 2. 금액 필드일 경우 숫자만 남기기
+  if (fieldName === 'price') {
+    // 숫자가 아닌 모든 문자를 제거
+    const onlyNumbers = String(form.value.price).replace(/[^0-9]/g, '');
+    // 가공된 값을 다시 form에 할당
+    form.value.price = onlyNumbers;
+  }
+};
+
 // ===== 카테고리 불러오기 =====
 categoryStore.fetchCategories();
 
@@ -156,37 +277,8 @@ const goBack = () => {
 
 // 저장 버튼
 const handleSave = async () => {
-  // 유효성 검사
-
-  // 날짜 필수
-  if (!form.value.date) {
-    alert('날짜를 입력해주세요.');
-    return;
-  }
-
-  // 금액 필수
-  if (!form.value.price) {
-    alert('금액을 입력해주세요.');
-    return;
-  }
-
-  // 지출일 때는 카테고리도 필수
-  if (form.value.type === 'expense' && !form.value.categoryId) {
-    alert('카테고리를 선택해주세요.');
-    return;
-  }
-
-  // 지출일 때는 장소도 필수
-  if (form.value.type === 'expense' && !form.value.place) {
-    alert('장소를 입력해주세요.');
-    return;
-  }
-
-  // 지출일 때는 품목도 필수
-  if (form.value.type === 'expense' && !form.value.products) {
-    alert('품목을 입력해주세요.');
-    return;
-  }
+  // 유효성 검사 함수
+  if (!validateForm()) return;
 
   // ===== 데이터 가공 =====
   const newTransaction = {
@@ -196,18 +288,9 @@ const handleSave = async () => {
     categoryId: form.value.type === 'income' ? 'income' : form.value.categoryId,
     memo: form.value.memo,
     place: form.value.place,
-    // 수입일 때 저장 안되게 할 경우
-    // place: form.value.type === 'income' ? '' : form.value.place,
     products: form.value.products
       ? form.value.products.split(',').map((p) => p.trim())
       : [],
-    // 수입일 때 저장 안되게 할 경우
-    // products:
-    //   form.value.type === 'income'
-    //     ? []
-    //     : form.value.products
-    //       ? form.value.products.split(',').map((p) => p.trim())
-    //       : [],
     location: await getLocationByPlace(form.value.place),
     receiptRef: form.value.receiptRef,
   };
@@ -218,7 +301,7 @@ const handleSave = async () => {
     alert('거래가 성공적으로 저장되었습니다.');
     router.push('/transactions');
   } catch (e) {
-    alert('저장에 실패했습니다. 다시 시도해주세요.');
+    formErrorMessage.value = '저장에 실패했습니다. 다시 시도해주세요.';
     console.error('저장 에러:', e);
   }
 };
@@ -264,6 +347,10 @@ const handleSave = async () => {
   font-weight: 500;
   color: #333;
   flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 /* ===== 입력 필드 ===== */
@@ -345,16 +432,24 @@ const handleSave = async () => {
   background-color: #5d6d97;
 }
 
-/* 숫자 입력 필드 스피너 숨기기 */
-/* Chrome, Edge */
-.form-input[type='number']::-webkit-outer-spin-button,
-.form-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+/* 에러 메시지 */
+.form-error-message {
+  margin: 10px 0;
+  color: #d9534f;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
 }
-/* Firefox */
-.form-input[type='number'] {
-  -moz-appearance: textfield;
-  appearance: textfield;
+
+.input-error {
+  border: 1.5px solid #d9534f !important;
+  background-color: #fff8f8; /* 살짝 붉은 배경을 주면 더 눈에 띕니다 */
+}
+
+/* 포커스 됐을 때도 빨간 테두리 유지 */
+.input-error:focus {
+  outline: none;
+  border-color: #d9534f !important;
+  box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.2);
 }
 </style>
