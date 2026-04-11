@@ -5,7 +5,7 @@
         <button class="arrow-btn" @click="prevMonth">&lt;</button>
         
         <h2 @click="showMonthPicker = true" class="date-title">
-          {{ formattedDate }} 재정 요약
+          {{ formattedDate }} 재무 요약
         </h2>
         
         <button class="arrow-btn" @click="nextMonth">&gt;</button>
