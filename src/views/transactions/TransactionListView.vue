@@ -701,7 +701,7 @@ section {
 }
 
 .calendar-sub-actions :deep(.v-btn) {
-  color: #ffffff !important;
+  color: black !important;
 }
 
 .custom-calendar {
