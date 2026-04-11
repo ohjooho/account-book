@@ -2,10 +2,15 @@
   <div class="monthly-summary-container">
     <header class="summary-header">
       <div class="month-selector">
-        <button @click="prevMonth">&lt;</button>
-        <h2>{{ formattedDate }} 재정 요약</h2>
-        <button @click="nextMonth">&gt;</button>
+        <button class="arrow-btn" @click="prevMonth">&lt;</button>
+        
+        <h2 @click="showMonthPicker = true" class="date-title">
+          {{ formattedDate }} 재정 요약
+        </h2>
+        
+        <button class="arrow-btn" @click="nextMonth">&gt;</button>
       </div>
+
       <div class="comparison-picker">
         <span class="badge">비교기간</span>
         <button @click="showCalendarLeft = true">{{ leftLabel }}</button>
@@ -33,16 +38,8 @@
       />
       <SummaryCard
         title="순수익"
-        :amount="
-          store.compareIncome && store.compareExpense
-            ? store.compareIncome.right - store.compareExpense.right
-            : store.netProfit
-        "
-        :diffAmount="
-          store.compareIncome && store.compareExpense
-            ? store.compareIncome.diff - store.compareExpense.diff
-            : store.diffNetProfit
-        "
+        :amount="store.compareIncome && store.compareExpense ? store.compareIncome.right - store.compareExpense.right : store.netProfit"
+        :diffAmount="store.compareIncome && store.compareExpense ? store.compareIncome.diff - store.compareExpense.diff : store.diffNetProfit"
         :diffLabel="compareRangeLeft ? compareLabel : null"
         type="profit"
       />
@@ -62,6 +59,13 @@
       </main>
     </div>
 
+    <MonthPicker 
+      v-if="showMonthPicker" 
+      :initialDate="store.currentMonth"
+      @confirm="handleMonthConfirm"
+      @close="showMonthPicker = false"
+    />
+
     <CalendarPicker
       v-if="showCalendarLeft"
       :initialDate="leftInitialDate"
@@ -79,35 +83,29 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useMonthlyStore } from '@/stores/monthly';
 
+import SummaryCard from '@/components/monthly/SummaryCard.vue';
 import BudgetBar from '@/components/monthly/BudgetBar.vue';
-import CalendarPicker from '@/components/monthly/CalendarPicker.vue';
 import CategoryList from '@/components/monthly/CategoryList.vue';
 import MonthlyChart from '@/components/monthly/MonthlyChart.vue';
-import SummaryCard from '@/components/monthly/SummaryCard.vue';
+import CalendarPicker from '@/components/monthly/CalendarPicker.vue';
+import MonthPicker from '@/components/monthly/MonthPicker.vue';
 
 const store = useMonthlyStore();
+
+const showMonthPicker = ref(false);
 const showCalendarLeft = ref(false);
 const showCalendarRight = ref(false);
 const compareRangeLeft = ref(null);
 const compareRangeRight = ref(null);
 const fixedCompareLabel = ref(null);
 
-const leftInitialDate = computed(() => {
-  const [year, month] = store.currentMonth.split('-').map(Number);
-  const prevDate = new Date(year, month - 2, 1);
-  return `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-01`;
-});
-
-const rightInitialDate = computed(() => `${store.currentMonth}-01`);
-
 onMounted(() => {
   store.fetchAll();
-
-  const [year, month] = store.currentMonth.split('-').map(Number);
-  const prevDate = new Date(year, month - 2);
+  const [y, m] = store.currentMonth.split('-').map(Number);
+  const prevDate = new Date(y, m - 2);
   fixedCompareLabel.value = `${prevDate.getMonth() + 1}월`;
 });
 
@@ -116,157 +114,141 @@ const formattedDate = computed(() => {
   return `${year}년 ${parseInt(month)}월`;
 });
 
+// MonthPicker에서 [확인] 눌렀을 때만 작동
+const handleMonthConfirm = (newYearMonth) => {
+  store.currentMonth = newYearMonth;
+  store.fetchAll();
+  showMonthPicker.value = false;
+};
+
 const prevMonth = () => store.prevMonth();
 const nextMonth = () => store.nextMonth();
 
 const handleConfirmLeft = (range) => {
   compareRangeLeft.value = range;
   showCalendarLeft.value = false;
-
   const month = range.start.split('-')[1];
   fixedCompareLabel.value = `${parseInt(month)}월`;
-
-  if (compareRangeRight.value) {
-    store.setCompareRange(range, compareRangeRight.value);
-  }
+  if (compareRangeRight.value) store.setCompareRange(range, compareRangeRight.value);
 };
 
 const handleConfirmRight = (range) => {
   compareRangeRight.value = range;
   showCalendarRight.value = false;
-
-  if (compareRangeLeft.value) {
-    store.setCompareRange(compareRangeLeft.value, range);
-  }
+  if (compareRangeLeft.value) store.setCompareRange(compareRangeLeft.value, range);
 };
 
 const leftLabel = computed(() => {
-  if (compareRangeLeft.value) {
-    return `${compareRangeLeft.value.start} ~ ${compareRangeLeft.value.end}`;
-  }
-
-  const [year, month] = store.currentMonth.split('-').map(Number);
-  const prevDate = new Date(year, month - 2);
+  if (compareRangeLeft.value) return `${compareRangeLeft.value.start} ~ ${compareRangeLeft.value.end}`;
+  const [y, m] = store.currentMonth.split('-').map(Number);
+  const prevDate = new Date(y, m - 2);
   return `${prevDate.getFullYear()}년 ${prevDate.getMonth() + 1}월`;
 });
 
 const rightLabel = computed(() => {
-  if (compareRangeRight.value) {
-    return `${compareRangeRight.value.start} ~ ${compareRangeRight.value.end}`;
-  }
-
+  if (compareRangeRight.value) return `${compareRangeRight.value.start} ~ ${compareRangeRight.value.end}`;
   return formattedDate.value;
 });
 
-const compareLabel = computed(() => {
-  if (fixedCompareLabel.value) {
-    return fixedCompareLabel.value;
-  }
+const leftInitialDate = computed(() => {
+  const [y, m] = store.currentMonth.split('-').map(Number);
+  const prev = new Date(y, m - 2, 1);
+  return `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-01`;
+});
 
-  const [year, month] = store.currentMonth.split('-').map(Number);
-  const prevDate = new Date(year, month - 2);
+const rightInitialDate = computed(() => `${store.currentMonth}-01`);
+
+const compareLabel = computed(() => {
+  if (fixedCompareLabel.value) return fixedCompareLabel.value;
+  const [y, m] = store.currentMonth.split('-').map(Number);
+  const prevDate = new Date(y, m - 2);
   return `${prevDate.getMonth() + 1}월`;
 });
 </script>
 
 <style scoped>
-.loading-overlay {
-  margin-bottom: 10px;
-  color: #0052cc;
-  font-weight: bold;
-  text-align: center;
-}
 
-.monthly-summary-container {
-  width: 100%;
-  min-height: 100vh;
-  padding: 20px 10px;
-  box-sizing: border-box;
+.loading-overlay { 
+  text-align: center; 
+  color: #0052cc; 
+  font-weight: bold; 
+  margin-bottom: 10px; }
+.monthly-summary-container { 
+  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+  border: 1px solid #ececf1;
+  padding: 20px 10px; 
   background: #fff;
+  min-height: 100vh; 
+  border-radius: 17px;
+  width: 100%; 
+  box-sizing: border-box; 
 }
-
-.summary-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 25px;
-  flex-wrap: nowrap;
+.summary-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 25px; 
 }
-
 .month-selector {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  flex-shrink: 0;
+  display: flex; 
+  align-items: center; 
+  gap: 15px; 
 }
-
-.month-selector h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  white-space: nowrap;
+.date-title { 
+  margin: 0; 
+  font-size: 30px; 
+  font-weight: 800; 
+  cursor: pointer; 
+  color: #111827; 
 }
-
-.month-selector button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 20px;
+.arrow-btn { 
+  background: none; 
+  border: none; 
+  cursor: pointer; 
+  font-size: 20px; 
+  color: #000; 
+  font-weight: bold; 
 }
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.budget-section {
-  margin-bottom: 10px;
-}
-
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 40px;
-}
-
-.category-list-area h3 {
-  margin-bottom: 20px;
-  font-size: 18px;
+.card-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+  gap: 20px; 
+  margin-bottom: 30px; 
+  font-size: 15px;
   font-weight: 700;
 }
-
-.badge {
-  margin-right: 8px;
+.budget-section { 
+  margin-bottom: 10px; 
+}
+.details-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+  gap: 40px; 
+}
+.category-list-area h3 { 
+  font-size: 18px; 
+  margin-bottom: 20px; 
+  font-weight: 700; 
+}
+.badge { 
+  background: #eee; 
   padding: 2px 8px;
-  border-radius: 4px;
-  background: #eee;
-  font-size: 12px;
+  border-radius: 4px; 
+  font-size: 12px; 
+  margin-right: 8px; 
 }
-
-.comparison-picker {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+.comparison-picker { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
 }
-
-.comparison-picker button {
-  width: auto;
-  max-width: 200px;
-  overflow: visible;
-  padding: 5px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
-  font-size: clamp(9px, 1.2vw, 13px);
-  white-space: nowrap;
-}
+.comparison-picker button { 
+  background: #fff; 
+  border: 1px solid #ddd; 
+  padding: 5px 12px; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-size: 13px; 
+  }
+  
 </style>

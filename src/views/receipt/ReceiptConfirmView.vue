@@ -297,7 +297,7 @@ const receiptSave = async () => {
       place: payload.aiResult.place,
       location: payload.aiResult.location,
       products: payload.aiResult.products,
-      receiptId: payload.id ?? '',
+      receiptRef: '',
     };
     // 거래 저장
     const trans = await transactionsStore.addTransactions(newTrans);
@@ -317,7 +317,10 @@ const receiptSave = async () => {
     };
 
     const savedReceipt = await receiptStore.addReceipt(newReceipt);
-    console.log(savedReceipt);
+    await transactionsStore.updateTransactions(trans.id, {
+      ...trans,
+      receiptRef: savedReceipt.id,
+    });
     // 임시 영수증 삭제
     await receiptStore.clearReceiptDraft();
     receiptDraft.value = null;

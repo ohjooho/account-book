@@ -4,7 +4,7 @@
       <span class="label">{{ title }}</span>
     </div>
     <div class="amount">₩ {{ (amount ?? 0).toLocaleString() }}</div>
-    <div :class="['diff', diffStatus]" v-if="diffLabel">
+    <div :class="['diff', diffTone]" v-if="diffLabel">
       {{ diffLabel }} 동기 대비 
       <span class="arrow">{{ (diffAmount ?? 0) >= 0 ? '↑' : '↓' }}</span>
       ₩ {{ Math.abs(diffAmount ?? 0).toLocaleString() }}
@@ -25,11 +25,12 @@ const props = defineProps({
 
 const diffLabel = computed(() => props.diffLabel ?? '이전달');
 
-const diffStatus = computed(() => {
+const diffTone = computed(() => {
   if (props.type === 'expense') {
-    return (props.diffAmount ?? 0) <= 0 ? 'good' : 'bad';
+    return (props.diffAmount ?? 0) <= 0 ? 'diff-positive' : 'diff-negative';
   }
-  return (props.diffAmount ?? 0) >= 0 ? 'good' : 'bad';
+
+  return (props.diffAmount ?? 0) >= 0 ? 'diff-positive' : 'diff-negative';
 });
 </script>
 
@@ -56,13 +57,14 @@ const diffStatus = computed(() => {
 .diff { 
   font-size: 13px; 
   color: #999; 
+  font-weight: 700;
 }
 
-.diff.good { 
+.diff.diff-positive { 
   color: #27ae60; 
 }
 
-.diff.bad { 
+.diff.diff-negative { 
   color: #e74c3c; 
 }
 

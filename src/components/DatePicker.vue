@@ -472,10 +472,6 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-<<<<<<< HEAD
-</style>
-=======
->>>>>>> origin/feat/transactions
 .year-button.selected {
   background: #222;
   color: #fff;

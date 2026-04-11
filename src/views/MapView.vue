@@ -1,141 +1,161 @@
 <template>
-  <div class="map-page">
-    <div class="map-toolbar">
-      <div class="page-title-wrap">
-        <h1 class="page-title">소비 지도</h1>
-      </div>
-    </div>
-
-    <div class="map-board" @click="isFilterOpen = false">
-      <div class="date-picker-wrap">
-        <DatePicker
-          v-model="selectedDateString"
-          :max-date="maxDateString"
-        />
+  <section class="map-view">
+    <article class="map-card">
+      <div class="map-toolbar">
+        <div class="page-title-wrap">
+          <h1 class="page-title">소비 지도</h1>
+        </div>
       </div>
 
-      <div class="filter-wrap">
-        <button class="filter-toggle" @click.stop="isFilterOpen = !isFilterOpen" aria-label="filter">
-          <svg
-            class="filter-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M7 10L12 15L17 10"
-              stroke="currentColor"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
+      <div class="map-board" @click="isFilterOpen = false">
+        <div class="date-picker-wrap">
+          <DatePicker v-model="selectedDateString" :max-date="maxDateString" />
+        </div>
 
-        <div v-if="isFilterOpen" class="category-stack" @click.stop>
+        <div class="filter-wrap">
           <button
-            v-for="category in categories"
-            :key="category.key"
-            class="category-chip"
-            :class="{ active: selectedCategory === category.key }"
-            :style="{ background: category.color }"
-            @click="selectCategory(category.key)"
+            class="filter-toggle"
+            :class="{ open: isFilterOpen }"
+            @click.stop="isFilterOpen = !isFilterOpen"
+            aria-label="filter"
           >
-            {{ category.label }}
+            <svg
+              class="filter-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M7 10L12 15L17 10"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </button>
-        </div>
-      </div>
 
-      <div ref="mapRef" class="map-area"></div>
-
-      <div
-        v-if="selectedItem"
-        class="detail-card clickable"
-        @click="goToTransactionDetail"
-      >
-        <div class="detail-top">{{ selectedItem.title }}</div>
-
-        <div class="detail-body">
-          <div class="detail-left">
-            <div class="detail-date">{{ selectedItem.date }}</div>
-            
-            <div
-              class="detail-category"
-              :style="{ color: selectedItem.categoryColor }"
+          <div v-if="isFilterOpen" class="category-stack" @click.stop>
+            <button
+              v-for="category in categories"
+              :key="category.key"
+              class="category-chip"
+              :class="{ active: selectedCategory === category.key }"
+              :style="{ background: category.color }"
+              @click="selectCategory(category.key)"
             >
-              {{ selectedItem.categoryLabel }}
-            </div>
-            <div
-              class="detail-amount"
-              :class="selectedItem.type === 'income' ? 'income' : 'expense'"
-            >
-              {{ selectedItem.amount }}
-            </div>
-          </div>
-
-          <div class="detail-right">
-            <div class="pin-badge">{{ selectedItem.icon }}</div>
-            <div class="detail-address">{{ selectedItem.address }}</div>
+              {{ category.label }}
+            </button>
           </div>
         </div>
+
+        <div ref="mapRef" class="map-area"></div>
+
+        <div
+          v-if="selectedItem"
+          class="detail-card clickable"
+          @click="goToTransactionDetail"
+        >
+          <div class="detail-top">{{ selectedItem.title }}</div>
+
+          <div class="detail-body">
+            <div class="detail-left">
+              <div class="detail-date">{{ selectedItem.date }}</div>
+
+              <div
+                class="detail-category"
+                :style="{ color: selectedItem.categoryColor }"
+              >
+                {{ selectedItem.categoryLabel }}
+              </div>
+              <div
+                class="detail-amount"
+                :class="selectedItem.type === 'income' ? 'income' : 'expense'"
+              >
+                {{ selectedItem.amount }}
+              </div>
+            </div>
+
+            <div class="detail-right">
+              <div class="pin-badge">{{ selectedItem.icon }}</div>
+              <div class="detail-address">{{ selectedItem.address }}</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import DatePicker from '@/components/DatePicker.vue'
-import data2 from '../../data2.json'
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import DatePicker from '@/components/DatePicker.vue';
+import { loadKakaoScript } from '@/utils/kakaoMap';
+import data2 from '../../data2.json';
 
-const router = useRouter()
+const router = useRouter();
 
-const mapRef = ref(null)
-const map = ref(null)
-const markers = ref([])
-const selectedCategory = ref('all')
-const selectedItem = ref(null)
-const isFilterOpen = ref(false)
-const transactions = ref([])
+const mapRef = ref(null);
+const map = ref(null);
+const markers = ref([]);
+const selectedCategory = ref('all');
+const selectedItem = ref(null);
+const isFilterOpen = ref(false);
+const transactions = ref([]);
 
 function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function formatCurrency(value) {
-  return `₩${value.toLocaleString('ko-KR')}`
+  return `₩${value.toLocaleString('ko-KR')}`;
 }
 
 function formatDate(date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function parseDateString(value) {
-  if (!value) return null
-  const [year, month, day] = value.split('-').map(Number)
-  return new Date(year, month - 1, day)
+  if (!value) return null;
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, month - 1, day);
 }
 
-const sourceToday = startOfDay(new Date(data2.meta.currentDate))
-const today = ref(sourceToday)
-const selectedDate = ref(sourceToday)
+function getKoreaDateString() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === 'year')?.value ?? '';
+  const month = parts.find((part) => part.type === 'month')?.value ?? '';
+  const day = parts.find((part) => part.type === 'day')?.value ?? '';
+
+  return `${year}-${month}-${day}`;
+}
+
+const sourceToday = startOfDay(parseDateString(getKoreaDateString()));
+const today = ref(sourceToday);
+const selectedDate = ref(sourceToday);
 
 const selectedDateString = computed({
   get() {
-    return formatDate(selectedDate.value)
+    return formatDate(selectedDate.value);
   },
   set(value) {
-    const parsed = parseDateString(value)
-    if (!parsed) return
-    selectedDate.value = startOfDay(parsed)
-  }
-})
+    const parsed = parseDateString(value);
+    if (!parsed) return;
+    selectedDate.value = startOfDay(parsed);
+  },
+});
 
-const maxDateString = computed(() => formatDate(today.value))
+const maxDateString = computed(() => formatDate(today.value));
 
 const categories = computed(() => {
   return [
@@ -143,35 +163,36 @@ const categories = computed(() => {
     ...data2.categories.map((category) => ({
       key: category.id,
       label: category.labelKo,
-      color: category.color?.startsWith('#') ? category.color : `#${category.color}`,
-      type: category.type
-    }))
-  ]
-})
+      color: category.color?.startsWith('#')
+        ? category.color
+        : `#${category.color}`,
+      type: category.type,
+    })),
+  ];
+});
 
 function getCategoryInfo(categoryId) {
-  return data2.categories.find((category) => category.id === categoryId)
+  return data2.categories.find((category) => category.id === categoryId);
 }
-
 
 function getMarkerIcon(item) {
-  if (item.type === 'income') return '₩'
-  if (item.categoryId === 'food') return '🍽️'
-  if (item.categoryId === 'transport') return '🚌'
-  if (item.categoryId === 'shopping') return '🛍️'
-  if (item.categoryId === 'medical') return '💊'
-  if (item.categoryId === 'subscription') return '💳'
-  if (item.categoryId === 'living') return '🏠'
-  if (item.categoryId === 'etc') return '📌'
-  return '📍'
+  if (item.type === 'income') return '₩';
+  if (item.categoryId === 'food') return '🍽️';
+  if (item.categoryId === 'transport') return '🚌';
+  if (item.categoryId === 'shopping') return '🛍️';
+  if (item.categoryId === 'medical') return '💊';
+  if (item.categoryId === 'subscription') return '💳';
+  if (item.categoryId === 'living') return '🏠';
+  if (item.categoryId === 'etc') return '📌';
+  return '📍';
 }
 
-function mapTransactionsFromData2() {
-  return data2.transactions.map((item) => {
-    const category = getCategoryInfo(item.categoryId)
+function mapTransactionsFromSource(items) {
+  return items.map((item) => {
+    const category = getCategoryInfo(item.categoryId);
     const categoryColor = category?.color?.startsWith('#')
       ? category.color
-      : `#${category?.color ?? '4474FF'}`
+      : `#${category?.color ?? '4474FF'}`;
 
     return {
       id: item.id,
@@ -189,46 +210,85 @@ function mapTransactionsFromData2() {
       icon: getMarkerIcon(item),
       memo: item.memo ?? '',
       products: item.products ?? [],
-      receiptId: item.receiptId ?? null
-    }
-  })
+      receiptRef: item.receiptRef ?? null,
+    };
+  });
 }
 
-function initializeTransactions() {
-  transactions.value = mapTransactionsFromData2()
+async function loadLiveTransactions() {
+  try {
+    const response = await fetch('/api/transactions');
+
+    if (!response.ok) {
+      throw new Error(`Failed to load transactions: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : data2.transactions;
+  } catch (error) {
+    console.warn(
+      'Failed to load live transactions for map view. Falling back to bundled data.',
+      error,
+    );
+    return data2.transactions;
+  }
+}
+
+function resolveInitialSelectedDate(items) {
+  const latestDate = [...items]
+    .filter((item) => item.date && item.lat && item.lng)
+    .sort((left, right) => {
+      const dateCompare = String(right.date).localeCompare(String(left.date));
+
+      if (dateCompare !== 0) {
+        return dateCompare;
+      }
+
+      return String(right.id).localeCompare(String(left.id));
+    })[0]?.date;
+
+  const parsed = parseDateString(latestDate);
+  return parsed ? startOfDay(parsed) : today.value;
+}
+
+async function initializeTransactions() {
+  const liveTransactions = await loadLiveTransactions();
+  transactions.value = mapTransactionsFromSource(liveTransactions);
+  selectedDate.value = resolveInitialSelectedDate(transactions.value);
 }
 
 const filteredTransactions = computed(() => {
-  const selected = formatDate(selectedDate.value)
+  const selected = formatDate(selectedDate.value);
 
   return transactions.value.filter((item) => {
-    const sameDate = item.date === selected
+    const sameDate = item.date === selected;
     const sameCategory =
-      selectedCategory.value === 'all' || item.category === selectedCategory.value
+      selectedCategory.value === 'all' ||
+      item.category === selectedCategory.value;
 
-    return sameDate && sameCategory
-  })
-})
+    return sameDate && sameCategory;
+  });
+});
 
 function goToTransactionDetail() {
-  if (!selectedItem.value?.id) return
+  if (!selectedItem.value?.id) return;
 
   router.push({
     path: '/transactions',
     query: {
-      selectedId: selectedItem.value.id
-    }
-  })
+      selectedId: selectedItem.value.id,
+    },
+  });
 }
 
 function selectCategory(categoryKey) {
-  selectedCategory.value = categoryKey
-  isFilterOpen.value = false
+  selectedCategory.value = categoryKey;
+  isFilterOpen.value = false;
 }
 
 function createMarkerImage(categoryKey) {
-  const category = categories.value.find((item) => item.key === categoryKey)
-  const fill = category?.color ?? '#4474FF'
+  const category = categories.value.find((item) => item.key === categoryKey);
+  const fill = category?.color ?? '#4474FF';
 
   const svg = `
     <svg width="44" height="56" viewBox="0 0 44 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -236,174 +296,163 @@ function createMarkerImage(categoryKey) {
       <circle cx="22" cy="22" r="10" fill="white"/>
       <circle cx="22" cy="22" r="4" fill="${fill}"/>
     </svg>
-  `.trim()
+  `.trim();
 
-  const encoded = encodeURIComponent(svg)
+  const encoded = encodeURIComponent(svg);
   return new window.kakao.maps.MarkerImage(
     `data:image/svg+xml;charset=utf-8,${encoded}`,
     new window.kakao.maps.Size(44, 56),
-    { offset: new window.kakao.maps.Point(22, 56) }
-  )
+    { offset: new window.kakao.maps.Point(22, 56) },
+  );
 }
 
 function clearMarkers() {
-  markers.value.forEach((marker) => marker.setMap(null))
-  markers.value = []
+  markers.value.forEach((marker) => marker.setMap(null));
+  markers.value = [];
 }
 
 function getAddressFromCoords(lat, lng) {
   return new Promise((resolve) => {
     if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
-      resolve('')
-      return
+      resolve('');
+      return;
     }
 
-    const geocoder = new window.kakao.maps.services.Geocoder()
-    const coord = new window.kakao.maps.LatLng(lat, lng)
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    const coord = new window.kakao.maps.LatLng(lat, lng);
 
     geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
-      if (status === window.kakao.maps.services.Status.OK && result.length > 0) {
-        const roadAddress = result[0].road_address?.address_name
-        const jibunAddress = result[0].address?.address_name
-        resolve(roadAddress || jibunAddress || '')
-        return
+      if (
+        status === window.kakao.maps.services.Status.OK &&
+        result.length > 0
+      ) {
+        const roadAddress = result[0].road_address?.address_name;
+        const jibunAddress = result[0].address?.address_name;
+        resolve(roadAddress || jibunAddress || '');
+        return;
       }
 
-      resolve('')
-    })
-  })
+      resolve('');
+    });
+  });
 }
 
 function renderMarkers() {
-  if (!map.value || !window.kakao || !window.kakao.maps) return
+  if (!map.value || !window.kakao || !window.kakao.maps) return;
 
-  clearMarkers()
+  clearMarkers();
 
-  const items = filteredTransactions.value
+  const items = filteredTransactions.value;
 
   if (items.length === 0) {
-    selectedItem.value = null
-    return
+    selectedItem.value = null;
+    return;
   }
 
-  const bounds = new window.kakao.maps.LatLngBounds()
+  const bounds = new window.kakao.maps.LatLngBounds();
 
   items.forEach((item, index) => {
-    const position = new window.kakao.maps.LatLng(item.lat, item.lng)
+    const position = new window.kakao.maps.LatLng(item.lat, item.lng);
 
     const marker = new window.kakao.maps.Marker({
       map: map.value,
       position,
-      image: createMarkerImage(item.category)
-    })
+      image: createMarkerImage(item.category),
+    });
 
     window.kakao.maps.event.addListener(marker, 'click', async () => {
-      const realAddress = await getAddressFromCoords(item.lat, item.lng)
+      const realAddress = await getAddressFromCoords(item.lat, item.lng);
 
       selectedItem.value = {
         ...item,
-        address: realAddress || item.address || item.title
-      }
+        address: realAddress || item.address || item.title,
+      };
 
-      map.value.panTo(position)
-    })
+      map.value.panTo(position);
+    });
 
-    markers.value.push(marker)
-    bounds.extend(position)
+    markers.value.push(marker);
+    bounds.extend(position);
 
     if (index === 0) {
       getAddressFromCoords(item.lat, item.lng).then((realAddress) => {
         selectedItem.value = {
           ...item,
-          address: realAddress || item.address || item.title
-        }
-      })
+          address: realAddress || item.address || item.title,
+        };
+      });
     }
-  })
+  });
 
-  map.value.setBounds(bounds)
+  map.value.setBounds(bounds);
 
   if (items.length === 1) {
-    map.value.setLevel(4)
-    map.value.panTo(new window.kakao.maps.LatLng(items[0].lat, items[0].lng))
+    map.value.setLevel(4);
+    map.value.panTo(new window.kakao.maps.LatLng(items[0].lat, items[0].lng));
   }
 }
 
-function loadKakaoScript() {
-  return new Promise((resolve, reject) => {
-    if (window.kakao && window.kakao.maps) {
-      resolve()
-      return
-    }
-
-    const existingScript = document.getElementById('kakao-map-sdk')
-
-    if (existingScript) {
-      existingScript.addEventListener('load', resolve, { once: true })
-      existingScript.addEventListener(
-        'error',
-        () => reject(new Error('Kakao SDK load error')),
-        { once: true }
-      )
-      return
-    }
-
-    const script = document.createElement('script')
-    script.id = 'kakao-map-sdk'
-    const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
-
-    script.src =
-      `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Kakao SDK load failed'))
-    document.head.appendChild(script)
-  })
-}
-
 async function initMap() {
-  await loadKakaoScript()
+  await loadKakaoScript();
 
   window.kakao.maps.load(() => {
-    if (!mapRef.value) return
+    if (!mapRef.value) return;
 
     map.value = new window.kakao.maps.Map(mapRef.value, {
       center: new window.kakao.maps.LatLng(37.5563, 126.922),
-      level: 4
-    })
+      level: 4,
+    });
 
     setTimeout(() => {
-      if (!map.value) return
-      window.kakao.maps.event.trigger(map.value, 'resize')
-      map.value.setCenter(new window.kakao.maps.LatLng(37.5563, 126.922))
-      renderMarkers()
-    }, 300)
-  })
+      if (!map.value) return;
+      window.kakao.maps.event.trigger(map.value, 'resize');
+      map.value.setCenter(new window.kakao.maps.LatLng(37.5563, 126.922));
+      renderMarkers();
+    }, 300);
+  });
 }
 
 watch([selectedDate, selectedCategory], () => {
-  renderMarkers()
-})
+  renderMarkers();
+});
 
 onMounted(async () => {
-  initializeTransactions()
-  await nextTick()
-  await initMap()
-})
+  await initializeTransactions();
+  await nextTick();
+  await initMap();
+});
 </script>
 
 <style scoped>
-.map-page {
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+.map-view {
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   width: 100%;
-  height: calc(100vh - 88px);
-  padding: 24px;
-  background: #f3f3f5;
-  overflow: hidden;
+  min-height: 100%;
   box-sizing: border-box;
 }
 
+.map-card {
+  width: 100%;
+  height: calc(100vh - 160px);
+  min-height: 620px;
+  padding: 24px;
+  border-radius: 17px;
+  border: 1px solid #ececf1;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+
 .map-toolbar {
-  margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .page-title-wrap {
@@ -414,16 +463,18 @@ onMounted(async () => {
 
 .page-title {
   margin: 0;
-  font-size: 26px;
-  font-weight: 700;
-  color: #111111;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #111827;
 }
 
 .map-board {
   position: relative;
   width: 100%;
-  height: calc(100% - 44px);
-  border-radius: 17px;
+  flex: 1;
+  min-height: 0;
+  border-radius: 15px;
   overflow: hidden;
   border: 1px solid #d9d9df;
   background: #ffffff;
@@ -675,7 +726,9 @@ onMounted(async () => {
   border: 1px solid #d9d9df;
   background: #ffffff;
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.14);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .detail-card.clickable {
@@ -767,8 +820,10 @@ onMounted(async () => {
 }
 
 @media (max-width: 980px) {
-  .map-page {
+  .map-card {
     padding: 16px;
+    height: calc(100vh - 144px);
+    min-height: 540px;
   }
 
   :deep(.calendar-card) {

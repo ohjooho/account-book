@@ -346,9 +346,10 @@ function createArcPath(startAngle, endAngle, innerRadius, outerRadius) {
 
 .card-title {
   margin: 0;
-  font-size: 26px;
+  font-size: 30px;
   line-height: 1.3;
   font-weight: 800;
+  color: #111827;
 }
 
 .prompt-badge {

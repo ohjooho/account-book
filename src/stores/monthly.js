@@ -1,12 +1,111 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
-const API = 'http://localhost:3000';
+const API = '/api';
+
+function getCurrentKoreaYearMonth() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === 'year')?.value ?? '';
+  const month = parts.find((part) => part.type === 'month')?.value ?? '';
+  return `${year}-${month}`;
+}
+
+function getYearMonth(dateString) {
+  return String(dateString ?? '').slice(0, 7);
+}
+
+function getLatestYearMonth(transactions) {
+  const yearMonths = Array.from(
+    new Set(
+      (Array.isArray(transactions) ? transactions : [])
+        .map((transaction) => getYearMonth(transaction.date))
+        .filter(Boolean),
+    ),
+  ).sort((left, right) => left.localeCompare(right));
+
+  return yearMonths[yearMonths.length - 1] ?? null;
+}
+
+function buildMonthlyCashflow(transactions, categories) {
+  const groupedTransactions = new Map();
+
+  (Array.isArray(transactions) ? transactions : []).forEach((transaction) => {
+    const yearMonth = getYearMonth(transaction.date);
+
+    if (!yearMonth) {
+      return;
+    }
+
+    if (!groupedTransactions.has(yearMonth)) {
+      groupedTransactions.set(yearMonth, []);
+    }
+
+    groupedTransactions.get(yearMonth).push(transaction);
+  });
+
+  const expenseCategories = (Array.isArray(categories) ? categories : []).filter(
+    (category) => category.type === 'expense',
+  );
+  const currentYearMonth = getCurrentKoreaYearMonth();
+
+  return [...groupedTransactions.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([yearMonth, monthlyTransactions]) => {
+      const totalIncome = monthlyTransactions
+        .filter((transaction) => transaction.type === 'income')
+        .reduce((sum, transaction) => sum + Number(transaction.price || 0), 0);
+      const totalSpend = monthlyTransactions
+        .filter((transaction) => transaction.type === 'expense')
+        .reduce((sum, transaction) => sum + Number(transaction.price || 0), 0);
+      const coveredDates = monthlyTransactions
+        .map((transaction) => String(transaction.date ?? ''))
+        .filter(Boolean)
+        .sort((left, right) => left.localeCompare(right));
+
+      return {
+        yearMonth,
+        totalIncome,
+        totalSpend,
+        totalCashflow: totalIncome - totalSpend,
+        coveredFrom: coveredDates[0] ?? `${yearMonth}-01`,
+        coveredTo:
+          coveredDates[coveredDates.length - 1] ?? `${yearMonth}-01`,
+        isPartialMonth: yearMonth === currentYearMonth,
+        spendingAnalysis: expenseCategories.map((category) => {
+          const categoryTransactions = monthlyTransactions.filter(
+            (transaction) =>
+              transaction.type === 'expense' &&
+              transaction.categoryId === category.id,
+          );
+          const totalAmount = categoryTransactions.reduce(
+            (sum, transaction) => sum + Number(transaction.price || 0),
+            0,
+          );
+
+          return {
+            categoryId: category.id,
+            totalAmount,
+            transactionCount: categoryTransactions.length,
+            percentage:
+              totalSpend > 0
+                ? Number(((totalAmount / totalSpend) * 100).toFixed(1))
+                : 0,
+          };
+        }),
+      };
+    });
+}
 
 export const useMonthlyStore = defineStore('monthly', {
   state: () => ({
     currentMonth: '2026-04',
     budgetLimit: 5000000,
+    loading: false,
     allCategories: [],
     allTransactions: [],
     allMonthlyCashflow: [],
@@ -130,14 +229,35 @@ export const useMonthlyStore = defineStore('monthly', {
 
   actions: {
     async fetchAll() {
-      const [cats, trans, cashflow] = await Promise.all([
-        axios.get(`${API}/categories`),
-        axios.get(`${API}/transactions`),
-        axios.get(`${API}/monthlyCashflow`),
-      ]);
-      this.allCategories = cats.data;
-      this.allTransactions = trans.data;
-      this.allMonthlyCashflow = cashflow.data;
+      this.loading = true;
+
+      try {
+        const [cats, trans] = await Promise.all([
+          axios.get(`${API}/categories`),
+          axios.get(`${API}/transactions`),
+        ]);
+
+        this.allCategories = cats.data;
+        this.allTransactions = trans.data;
+        this.allMonthlyCashflow = buildMonthlyCashflow(
+          this.allTransactions,
+          this.allCategories,
+        );
+
+        const latestYearMonth =
+          getLatestYearMonth(this.allTransactions) ??
+          getCurrentKoreaYearMonth();
+
+        if (
+          !this.allMonthlyCashflow.some(
+            (item) => item.yearMonth === this.currentMonth,
+          )
+        ) {
+          this.currentMonth = latestYearMonth;
+        }
+      } finally {
+        this.loading = false;
+      }
     },
     setBudget(amount) {
       this.budgetLimit = amount;

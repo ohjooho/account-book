@@ -37,6 +37,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       return response.data;
     } catch (e) {
       console.error('거래 추가 실패:', e);
+      throw e;
     }
   };
 
@@ -44,12 +45,16 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const updateTransactions = async (id, updates) => {
     try {
       const response = await axios.put(`${BASEURI}/${id}`, updates);
-      const index = transactions.value.findIndex((t) => t.id === Number(id));
+      const index = transactions.value.findIndex(
+        (t) => String(t.id) === String(id),
+      );
       if (index !== -1) {
         transactions.value[index] = response.data;
       }
+      return response.data;
     } catch (e) {
       console.error('거래 수정 실패:', e);
+      throw e;
     }
   };
 
@@ -58,7 +63,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     try {
       await axios.delete(`${BASEURI}/${id}`);
       transactions.value = transactions.value.filter(
-        (t) => t.id !== Number(id),
+        (t) => String(t.id) !== String(id),
       );
     } catch (e) {
       console.error('거래 삭제 실패:', e);

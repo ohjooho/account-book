@@ -211,8 +211,26 @@ const handleFileChange = async (event) => {
   min-width: 120px;
   font-size: 1rem;
   font-weight: 700;
-  background-color: #4e8780;
+  color: #ffffff;
+  border: 1px solid #d9dde5;
   border-radius: 17px;
+  background: linear-gradient(135deg, #5b9a94 0%, #6cb3ab 100%);
+  box-shadow: 0 10px 20px rgba(91, 154, 148, 0.18);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.receipt-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(91, 154, 148, 0.24);
+}
+
+.receipt-button:disabled {
+  opacity: 0.72;
+  cursor: wait;
 }
 
 .loading-box {

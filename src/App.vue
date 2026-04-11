@@ -5,10 +5,10 @@
         <div class="logo-area">
           <img
             :src="getAssetUrl('Book.png')"
-            alt="가계부"
+            alt="드롭스"
             class="header-logo"
           />
-          <h1 class="header-title">가계부</h1>
+          <h1 class="header-title">드롭스</h1>
         </div>
         <img
           :src="getAssetUrl('account_circle.png')"

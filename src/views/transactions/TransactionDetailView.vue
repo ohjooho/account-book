@@ -8,7 +8,7 @@
         <label class="form-label">영수증</label>
         <div class="receipt-content">
           <img
-            :src="receipt.imageUrl"
+            :src="receiptImageUrl"
             :alt="`영수증 ${receipt.id}`"
             class="receipt-image"
           />
@@ -189,10 +189,66 @@ const todayString = computed(() => {
 // ===== 영수증 데이터 =====
 const receipt = ref(null);
 
+const receiptImageUrl = computed(() => {
+  if (!receipt.value?.imageUrl) return '';
+  if (/^https?:\/\//.test(receipt.value.imageUrl)) {
+    return receipt.value.imageUrl;
+  }
+
+  return `http://localhost:3001${receipt.value.imageUrl}`;
+});
+
 // ===== 지출 카테고리만 필터링 =====
 const expenseCategories = computed(() => {
   return categoryStore.categories.filter((c) => c.type === 'expense');
 });
+
+const loadReceipt = async (transaction) => {
+  if (!transaction?.receiptRef && !transaction?.id) {
+    receipt.value = null;
+    return;
+  }
+
+  const queries = [];
+
+  if (transaction.receiptRef) {
+    queries.push(() => axios.get(`/api/receipts/${transaction.receiptRef}`));
+  }
+
+  queries.push(() =>
+    axios.get('/api/receipts', {
+      params: {
+        transactionId: transaction.id,
+      },
+    }),
+  );
+
+  queries.push(() =>
+    axios.get('/api/receipts', {
+      params: {
+        transactionRef: transaction.id,
+      },
+    }),
+  );
+
+  for (const request of queries) {
+    try {
+      const response = await request();
+      const payload = Array.isArray(response.data)
+        ? response.data[0] ?? null
+        : response.data;
+
+      if (payload) {
+        receipt.value = payload;
+        return;
+      }
+    } catch (e) {
+      console.warn('영수증 대체 조회 시도 실패:', e);
+    }
+  }
+
+  receipt.value = null;
+};
 
 // ===== 페이지 마운트 시 =====
 onMounted(async () => {
@@ -227,16 +283,7 @@ onMounted(async () => {
   };
 
   // ===== 영수증 불러오기 (receiptRef가 있을 때만) =====
-  if (transaction.receiptRef) {
-    try {
-      const response = await axios.get(
-        `/api/receipts/${transaction.receiptRef}`,
-      );
-      receipt.value = response.data;
-    } catch (e) {
-      console.error('영수증 조회 실패:', e);
-    }
-  }
+  await loadReceipt(transaction);
 });
 
 // ===== 에러 상태 관리 변수 추가 =====

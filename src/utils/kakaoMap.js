@@ -2,7 +2,7 @@ let kakaoScriptLoadingPromise = null;
 
 // kakaomap script
 export const loadKakaoScript = () => {
-  if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+  if (window.kakao && window.kakao.maps) {
     return Promise.resolve();
   }
 
@@ -14,6 +14,11 @@ export const loadKakaoScript = () => {
     const existingScript = document.getElementById('kakao-map-sdk');
 
     if (existingScript) {
+      if (existingScript.dataset.loaded === 'true' || (window.kakao && window.kakao.maps)) {
+        resolve();
+        return;
+      }
+
       existingScript.addEventListener('load', resolve, { once: true });
       existingScript.addEventListener(
         'error',
@@ -30,7 +35,10 @@ export const loadKakaoScript = () => {
 
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`;
 
-    script.onload = () => resolve();
+    script.onload = () => {
+      script.dataset.loaded = 'true';
+      resolve();
+    };
     script.onerror = () => reject(new Error('Kakao SDK load failed'));
 
     document.head.appendChild(script);
