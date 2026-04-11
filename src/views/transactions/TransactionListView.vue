@@ -88,18 +88,14 @@
         </div>
 
         <div class="filter-group">
-          <input
-            type="date"
+          <DatePicker
             v-model="filter.startDate"
             @input="filter.period = 'custom'"
-            class="date-input"
           />
           <span>~</span>
-          <input
-            type="date"
+          <DatePicker
             v-model="filter.endDate"
             @input="filter.period = 'custom'"
-            class="date-input"
           />
         </div>
 
@@ -199,6 +195,7 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoryStore } from '@/stores/category';
+import DatePicker from '@/components/DatePicker.vue';
 
 // Store 연결
 const transactionsStore = useTransactionsStore();
@@ -886,6 +883,45 @@ button.active {
 
 .search-input {
   width: 100%;
+}
+
+:deep(.date-picker .date-pill) {
+  /* 1. 높이 및 크기 최적화 (다른 버튼과 맞추기) */
+  height: auto !important;
+  min-height: 0 !important;
+
+  /* 2. 다른 요소(.search-input 등)와 똑같은 패딩과 테두리 적용 */
+  padding: 6px 10px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+
+  /* 3. 폰트 크기도 비슷하게 맞춤 */
+  font-size: 15px;
+
+  /* 2. 줄바꿈 방지 및 내부 정렬 (가로 한 줄 유지) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px; /* 화살표와 날짜 사이 간격 */
+  white-space: nowrap; /* 텍스트 줄바꿈 절대 금지 */
+  min-width: 155px; /* 날짜가 길어져도 틀이 깨지지 않게 최소 너비 확보 */
+}
+
+/* 내부 글자가 찌그러지지 않도록 고정 */
+:deep(.date-picker .date-pill span) {
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* 화살표 버튼 크기도 인풋창 높이에 맞춰 미세 조정 */
+:deep(.date-picker .date-arrow) {
+  font-size: 14px;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ===== 빈 상태 ===== */

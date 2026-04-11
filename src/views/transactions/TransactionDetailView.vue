@@ -29,11 +29,9 @@
           >날짜
           <span style="color: red">*</span>
         </label>
-        <input
-          type="date"
+        <DatePicker
           v-model="form.date"
           ref="dateInputRef"
-          class="form-input"
           :class="{ 'input-error': invalidField === 'date' }"
           @input="handleInput('date')"
         />
@@ -152,6 +150,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoryStore } from '@/stores/category';
 import { getLocationByPlace } from '@/utils/kakaoMap';
+import DatePicker from '@/components/DatePicker.vue';
 import axios from 'axios';
 
 // ===== Store 연결 =====
@@ -171,6 +170,20 @@ const form = ref({
   place: '',
   products: '',
   memo: '',
+});
+
+// 오늘 날짜를 'YYYY-MM-DD' 형식으로 계산 (미래 날짜 선택 방지용)
+const todayString = computed(() => {
+  const t = new Date();
+  const year = t.getFullYear();
+  const month = t.getMonth() + 1;
+  const day = t.getDate();
+
+  // 10보다 작으면 '0'을 붙이고, 아니면 그대로 유지
+  const m = month < 10 ? '0' + month : month;
+  const d = day < 10 ? '0' + day : day;
+
+  return `${year}-${m}-${d}`;
 });
 
 // ===== 영수증 데이터 =====
@@ -583,5 +596,10 @@ const handleDelete = async () => {
   outline: none;
   border-color: #d9534f !important;
   box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.2);
+}
+/* DatePicker가 다른 요소들보다 항상 위에 보이도록 설정 */
+.date-picker {
+  position: relative;
+  z-index: 9999; /* 매우 높은 값을 주어 최상단으로 올림 */
 }
 </style>

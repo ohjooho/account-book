@@ -35,11 +35,10 @@
           날짜
           <span style="color: red">*</span>
         </label>
-        <input
-          type="date"
+        <DatePicker
           v-model="form.date"
+          :max-date="todayString"
           ref="dateInputRef"
-          class="form-input"
           :class="{ 'input-error': invalidField === 'date' }"
           @input="handleInput('date')"
         />
@@ -154,6 +153,7 @@ import { useRouter } from 'vue-router';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoryStore } from '@/stores/category';
 import { getLocationByPlace } from '@/utils/kakaoMap';
+import DatePicker from '@/components/DatePicker.vue';
 
 // ===== Store 연결 =====
 const transactionsStore = useTransactionsStore();
@@ -173,6 +173,20 @@ const form = ref({
   memo: '', // 메모
   location: {},
   receiptRef: '',
+});
+
+// 오늘 날짜를 'YYYY-MM-DD' 형식으로 계산 (미래 날짜 선택 방지용)
+const todayString = computed(() => {
+  const t = new Date();
+  const year = t.getFullYear();
+  const month = t.getMonth() + 1;
+  const day = t.getDate();
+
+  // 10보다 작으면 '0'을 붙이고, 아니면 그대로 유지
+  const m = month < 10 ? '0' + month : month;
+  const d = day < 10 ? '0' + day : day;
+
+  return `${year}-${m}-${d}`;
 });
 
 // ===== 에러 상태 관리 변수 추가 =====
