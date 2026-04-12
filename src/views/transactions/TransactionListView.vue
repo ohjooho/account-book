@@ -1,6 +1,6 @@
 <template>
   <div class="transaction-list-page">
-    <!-- ===== 1. 달력 영역 (나중에 구현) ===== -->
+    <!-- ===== 1. 달력 영역 ===== -->
     <section class="calendar-section">
       <div class="calendar-card">
         <div class="calendar-header">
@@ -13,7 +13,12 @@
           </v-btn>
         </div>
         <div class="calendar-sub-actions">
-          <v-btn size="small" variant="text" @click="resetSelectedDateFilter">
+          <v-btn
+            size="small"
+            variant="text"
+            :class="{ active: filter.period === 'all' }"
+            @click="setPeriod('all')"
+          >
             전체 보기
           </v-btn>
         </div>
@@ -88,15 +93,9 @@
         </div>
 
         <div class="filter-group">
-          <DatePicker
-            v-model="filter.startDate"
-            @input="filter.period = 'custom'"
-          />
+          <DatePicker v-model="filter.startDate" />
           <span>~</span>
-          <DatePicker
-            v-model="filter.endDate"
-            @input="filter.period = 'custom'"
-          />
+          <DatePicker v-model="filter.endDate" :min-date="filter.startDate" />
         </div>
 
         <div class="filter-group">
@@ -205,6 +204,9 @@ const categoryStore = useCategoryStore();
 const router = useRouter();
 const route = useRoute();
 
+// 오늘 날짜 문자열 (YYYY-MM-DD)
+const todayStr = new Date().toISOString().split('T')[0];
+
 // 필터 상태 관리
 const filter = reactive({
   period: 'all',
@@ -223,21 +225,14 @@ const updateQuery = () => {
   // '이번 달' 버튼 클릭 시에는 yearMonth 사용
   if (filter.period === 'month' && filter.startDate) {
     query.yearMonth = filter.startDate.slice(0, 7);
-
-    // '이번 달' 조회 시 달력을 해당 월의 시작일로 이동
-    handleFilterRangeChange(filter.startDate, filter.endDate);
+    selectedDate.value = filter.startDate;
   } else {
     // 직접 날짜를 선택했거나 '오늘'인 경우 start/end 사용
     query.start = filter.startDate || undefined;
     query.end = filter.endDate || undefined;
 
-    // 💡 추가: 오늘 혹은 직접 선택 시 달력 이동
-    if (filter.startDate && filter.startDate === filter.endDate) {
-      // 시작일과 종료일이 같으면 '단일 날짜'로 간주
-      handleFilterDateChange(filter.startDate);
-    } else if (filter.startDate) {
-      // 기간이 설정되어 있으면 '기간'으로 이동
-      handleFilterRangeChange(filter.startDate, filter.endDate);
+    if (filter.startDate) {
+      selectedDate.value = filter.startDate;
     }
   }
 
@@ -245,8 +240,41 @@ const updateQuery = () => {
 };
 
 watch(
-  [() => filter.categoryId, () => filter.startDate, () => filter.endDate],
+  () => filter.categoryId,
   () => {
+    updateQuery();
+  },
+);
+
+watch(
+  [() => filter.startDate, () => filter.endDate],
+  ([startDate, endDate], [prevStartDate]) => {
+    if (startDate || endDate) {
+      filter.period = 'custom';
+    }
+
+    // 시작일 없이 종료일만 고른 경우 → 시작일을 종료일로 맞춤
+    if (!startDate && endDate) {
+      filter.startDate = endDate;
+      selectedDate.value = endDate;
+    }
+
+    // 원래 시작일이 있었는데, 사용자가 시작일을 지운 상태에서 종료일만 남은 경우도 보정
+    if (!filter.startDate && filter.endDate) {
+      filter.startDate = filter.endDate;
+      selectedDate.value = filter.endDate;
+      return;
+    }
+
+    // 종료일이 시작일보다 빠르면 종료일을 시작일로 보정
+    if (startDate && endDate && endDate < startDate) {
+      filter.startDate = endDate;
+    }
+
+    if (startDate && startDate !== prevStartDate) {
+      selectedDate.value = startDate;
+    }
+
     updateQuery();
   },
 );
@@ -277,75 +305,20 @@ onBeforeUnmount(() => {
 onMounted(async () => {
   await transactionsStore.fetchTransactions();
   await categoryStore.fetchCategories();
-  // 페이지 로드 시 쿼리 파라미터가 있다면 필터에 적용
-  // applyQueryParams();
 });
 
 // ===== 달력 상태 =====
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
-// ===== 선택한 날짜 기준 거래 목록 필터 =====
-const selectedFilterDate = ref('');
-// ===== 선택한 기간 기준 필터 =====
-const selectedDateRange = ref({
-  start: '',
-  end: '',
-});
 
 // functions
 
 // ========= 달력 관련 함수 ==========
-// selectedDate가 바뀌면 "단일 날짜 선택"으로 간주
-watch(selectedDate, (newDate) => {
-  if (!newDate) return;
-
-  // 이미 같은 날짜면 불필요한 재할당 방지
-  if (selectedFilterDate.value !== newDate) {
-    selectedFilterDate.value = newDate;
-  }
-
-  // 달력에서 날짜를 직접 선택했으면 기간 필터는 해제
-  if (selectedDateRange.value.start || selectedDateRange.value.end) {
-    selectedDateRange.value = {
-      start: '',
-      end: '',
-    };
-  }
-});
-
-// 필터에서 특정 날짜가 바뀌면 달력도 이동
-watch(selectedFilterDate, (newDate) => {
-  if (!newDate) return;
-
-  if (selectedDate.value !== newDate) {
-    selectedDate.value = newDate;
-  }
-});
-
-// 필터에서 기간이 바뀌면 달력은 시작일 기준으로 이동
-watch(
-  selectedDateRange,
-  (newRange) => {
-    const { start, end } = newRange;
-
-    // 기간 선택이 시작되면 단일 날짜 필터는 해제
-    if (start || end) {
-      if (selectedFilterDate.value) {
-        selectedFilterDate.value = '';
-      }
-
-      if (start && selectedDate.value !== start) {
-        selectedDate.value = start;
-      }
-    }
-  },
-  { deep: true },
-);
-
+// 달력 헤더 현재 연/월 표시
 const currentMonthLabel = computed(() => {
   const date = new Date(selectedDate.value);
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
 });
-
+// 달력 헤더 양옆 월 이동 버튼
 const moveMonth = (diff) => {
   const date = new Date(selectedDate.value);
   date.setMonth(date.getMonth() + diff);
@@ -375,7 +348,7 @@ const calendarSummaryMap = computed(() => {
 
   return map;
 });
-
+// 특정 날짜의 수입/지출 건수 가져오기
 const getSummaryByDate = (dateStr) => {
   return (
     calendarSummaryMap.value[dateStr] || {
@@ -402,49 +375,9 @@ const getCalendarCell = (slotProps) => {
   return null;
 };
 
-// 특정 날짜로 달력과 단일 날짜 필터를 함께 이동
-const syncCalendarToDate = (dateStr) => {
-  if (!dateStr) return;
-
-  // 특정 날짜 선택 시 기간 필터 초기화
-  selectedDateRange.value = {
-    start: '',
-    end: '',
-  };
-
-  selectedDate.value = dateStr;
-  selectedFilterDate.value = dateStr;
-};
-
-// 특정 기간으로 달력과 기간 필터를 함께 이동
-const syncCalendarToRange = (startDate, endDate) => {
-  selectedDateRange.value = {
-    start: startDate || '',
-    end: endDate || '',
-  };
-
-  // 기간 선택 시 특정 날짜 필터 초기화
-  selectedFilterDate.value = '';
-
-  // 달력은 시작일 기준으로 이동
-  if (startDate) {
-    selectedDate.value = startDate;
-  }
-};
-
 // 캘린더에서 날짜 클릭할 때
 const handleDateSelect = (dateStr) => {
-  syncCalendarToDate(dateStr);
-};
-
-// 필터에서 날짜 선택할 때 캘린더 연동함수
-const handleFilterDateChange = (dateStr) => {
-  syncCalendarToDate(dateStr);
-};
-
-// 필터에서 기간 선택할 때 캘린더 연동함수
-const handleFilterRangeChange = (startDate, endDate) => {
-  syncCalendarToRange(startDate, endDate);
+  setPeriod('custom', dateStr);
 };
 
 // 필터링 관련 함수
@@ -481,7 +414,6 @@ const applyQueryParams = () => {
     filter.startDate = query.start || '';
     filter.endDate = query.end || '';
 
-    const todayStr = new Date().toISOString().split('T')[0];
     if (filter.startDate === todayStr && filter.endDate === todayStr) {
       filter.period = 'today';
     } else {
@@ -505,34 +437,61 @@ watch(
 );
 
 // 기간 버튼 클릭 핸들러
-const setPeriod = (p) => {
+const setPeriod = (p, dateStr = null) => {
+  if (dateStr > todayStr) {
+    // 오늘 이후 날짜 선택 시, 오늘 날짜로 초기화
+    filter.startDate = todayStr;
+    filter.endDate = todayStr;
+    return;
+  } else {
+    filter.startDate = dateStr || todayStr;
+    filter.endDate = dateStr || todayStr;
+  }
   filter.period = p;
-  const now = new Date();
-
-  // 오늘 날짜를 YYYY-MM-DD 형식으로 변환
-  const getTodayStr = () => {
-    return now.toISOString().split('T')[0];
-  };
 
   if (p === 'today') {
-    // YYYY-MM-DD 형식으로 변환
-    const todayStr = getTodayStr();
+    filter.period = 'today';
     filter.startDate = todayStr;
     filter.endDate = todayStr;
   } else if (p === 'month') {
     // 1. 현재 연도와 월 YYYY-MM 형식으로 추출
-    const currentYearMonth = getTodayStr().slice(0, 7);
+    const currentYearMonth = todayStr.slice(0, 7);
 
     // 2. 이번 달의 마지막 날 계산
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const lastDay = new Date(year, month, 0).getDate();
+    const year = todayStr.slice(0, 4);
+    const month = parseInt(todayStr.slice(5, 7)) + 1;
+    const lastDay = new Date(year, month, 0).getDate() - 1;
 
+    filter.period = 'month';
     filter.startDate = `${currentYearMonth}-01`;
     filter.endDate = `${currentYearMonth}-${lastDay}`;
   } else if (p === 'all') {
+    filter.period = 'all';
     filter.startDate = '';
     filter.endDate = '';
+    filter.searchQuery = '';
+    selectedDate.value = todayStr;
+
+    router.replace({
+      path: '/transactions',
+      query: {},
+    });
+  } else if (p === 'custom') {
+    // 커스텀 모드는 날짜 입력창에서 직접 날짜를 선택하도록 유도 (버튼 자체는 활성화 상태 유지)
+    filter.period = 'custom';
+    filter.startDate = dateStr || filter.startDate;
+    filter.endDate = dateStr || filter.endDate;
+
+    filter.searchQuery = dateStr ? filter.searchQuery : '';
+    selectedDate.value = dateStr || selectedDate.value;
+
+    router.replace({
+      path: '/transactions',
+      query: {
+        start: filter.startDate || undefined,
+        end: filter.endDate || undefined,
+      },
+    });
   }
 
   updateQuery();
@@ -614,41 +573,20 @@ const goToDetail = (id) => {
   router.push(`/transactions/${id}`);
 };
 
-// 날짜 최신순으로 정렬된 거래 목록
-// const sortedTransactions = computed(() => {
-//   // 원본 배열을 훼손하지 않기 위해 복사 후 정렬
-//   return [...transactionsStore.transactions].sort((a, b) => {
-//     // 날짜 내림차순 (최신이 위)
-//     if (a.date !== b.date) {
-//       return b.date.localeCompare(a.date);
-//     }
-//     // 날짜가 같으면 id 내림차순 (큰 id = 나중에 추가된 것)
-//     return b.id - a.id;
-//   });
-// });
-
-// 선택한 날짜가 있으면 그 날짜 거래만 보여주기
-const displayedTransactions = computed(() => {
-  if (!selectedFilterDate.value) {
-    return sortedTransactions.value;
-  }
-
-  return sortedTransactions.value.filter(
-    (transaction) => transaction.date === selectedFilterDate.value,
-  );
-});
-
 // 날짜/기간 선택 해제 → 전체 목록 다시 보기
 const resetSelectedDateFilter = () => {
-  selectedFilterDate.value = '';
-  selectedDateRange.value = {
-    start: '',
-    end: '',
-  };
-  //필터 상태 전체 기간으로 복귀
-  setPeriod('all');
-  // 달력은 오늘 달로 복귀
-  selectedDate.value = new Date().toISOString().slice(0, 10);
+  filter.period = 'all';
+  filter.startDate = '';
+  filter.endDate = '';
+  filter.categoryId = '';
+  filter.searchQuery = '';
+
+  selectedDate.value = todayStr;
+
+  router.replace({
+    path: '/transactions',
+    query: {},
+  });
 };
 </script>
 
@@ -701,6 +639,7 @@ section {
 }
 
 .calendar-sub-actions :deep(.v-btn) {
+  background-color: white;
   color: black !important;
 }
 
@@ -801,18 +740,20 @@ section {
 /* 날짜 칸 안 하단 요약 */
 .custom-day-overlay {
   position: absolute;
-  left: 10px;
-  bottom: 10px;
+  inset: 0;
   z-index: 2;
+  cursor: pointer;
 }
 
 .custom-day-summary {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
 }
-
 .summary-badge {
   display: inline-flex;
   align-items: center;
