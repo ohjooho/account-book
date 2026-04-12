@@ -53,7 +53,7 @@
               selected: day.currentMonth && isSameDate(day.date, selectedDate),
               future: day.currentMonth && day.isFuture,
             }"
-            :disabled="!day.currentMonth || day.isFuture"
+            :disabled="!day.currentMonth || day.isFuture || day.isBeforeMin"
             @click="selectDate(day.date)"
           >
             {{ day.label }}
@@ -91,6 +91,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  minDate: {
+    type: String,
+    default: '',
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -124,6 +128,13 @@ const today = computed(() => {
   return startOfDay(new Date());
 });
 
+const minDay = computed(() => {
+  if (props.minDate) {
+    return startOfDay(parseDateString(props.minDate));
+  }
+  return null;
+});
+
 const selectedDate = ref(parseDateString(props.modelValue) || today.value);
 const currentMonth = ref(
   new Date(selectedDate.value.getFullYear(), selectedDate.value.getMonth(), 1),
@@ -138,6 +149,7 @@ watch(
     selectedDate.value = parsed;
     currentMonth.value = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
   },
+  { immediate: true },
 );
 
 watch(
@@ -216,6 +228,7 @@ const calendarDays = computed(() => {
       currentMonth: true,
       date,
       isFuture: date > today.value,
+      isBeforeMin: minDay.value ? date < minDay.value : false,
     });
   }
 
@@ -232,7 +245,9 @@ const toggleCalendar = () => {
 };
 
 const selectDate = (date) => {
-  if (!date || date > today.value) return;
+  if (!date) return;
+  if (date > today.value) return;
+  if (minDay.value && date < minDay.value) return;
 
   selectedDate.value = new Date(date);
   currentMonth.value = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -243,6 +258,18 @@ const selectDate = (date) => {
 const moveDate = (direction) => {
   const next = new Date(selectedDate.value);
   next.setDate(next.getDate() + direction);
+
+  if (minDay.value && next < minDay.value) {
+    selectedDate.value = new Date(minDay.value);
+    currentMonth.value = new Date(
+      minDay.value.getFullYear(),
+      minDay.value.getMonth(),
+      1,
+    );
+    emit('update:modelValue', formatDate(minDay.value));
+    isCalendarOpen.value = false;
+    return;
+  }
 
   if (next > today.value) {
     selectedDate.value = new Date(today.value);
