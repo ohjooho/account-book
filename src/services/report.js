@@ -1,4 +1,4 @@
-import sourceData from '../../data2.json';
+import sourceData from '../../data.json';
 
 // 화면에는 프롬프트 대신 더 자연스러운 안내 문구만 보여줍니다.
 export const REPORT_UI_DESCRIPTIONS = {
@@ -25,10 +25,12 @@ const SAVINGS_RATE_MAP = {
 
 const SAVINGS_TIP_MAP = {
   living: '고정 지출을 다시 점검하면 가장 큰 절약 폭을 만들 수 있어요.',
-  subscription: '사용 빈도가 낮은 서비스부터 정리하면 부담 없이 줄일 수 있어요.',
+  subscription:
+    '사용 빈도가 낮은 서비스부터 정리하면 부담 없이 줄일 수 있어요.',
   shopping: '충동구매를 줄이고 구매 주기를 늘리면 효과가 빠르게 보여요.',
   food: '외식과 배달 빈도를 줄이고 직접 준비하는 식사를 늘리면 절약 폭이 커져요.',
-  transport: '짧은 거리는 도보나 대중교통으로 대체하면 비용을 안정적으로 줄일 수 있어요.',
+  transport:
+    '짧은 거리는 도보나 대중교통으로 대체하면 비용을 안정적으로 줄일 수 있어요.',
   medical: '정기 구매 품목은 비교 구매로 소폭 절감이 가능해요.',
   etc: '기타 지출은 소액 결제를 묶어서 확인하면 새는 돈을 줄일 수 있어요.',
 };
@@ -138,7 +140,10 @@ async function loadReportSourceData() {
 
 function normalizeReportResponse(payload) {
   const report =
-    payload && typeof payload === 'object' && payload.data && typeof payload.data === 'object'
+    payload &&
+    typeof payload === 'object' &&
+    payload.data &&
+    typeof payload.data === 'object'
       ? payload.data
       : payload;
 
@@ -168,9 +173,10 @@ function buildLocalFallbackReport(data = sourceData) {
       label: getCategoryLabel(categoryMap[item.categoryId], item.categoryId),
       color: normalizeColor(categoryMap[item.categoryId]?.color ?? '#999999'),
       share: Number(
-        ((item.totalAmount / Math.max(monthlyItem.totalSpend, 1)) * 100).toFixed(
-          1,
-        ),
+        (
+          (item.totalAmount / Math.max(monthlyItem.totalSpend, 1)) *
+          100
+        ).toFixed(1),
       ),
       totalAmount: item.totalAmount,
     }))
@@ -221,8 +227,10 @@ function buildLocalFallbackReport(data = sourceData) {
     1,
   );
   const realisticSavings = Math.round(
-    savingsRecommendations.reduce((sum, item) => sum + item.expectedSavings, 0) *
-      0.65,
+    savingsRecommendations.reduce(
+      (sum, item) => sum + item.expectedSavings,
+      0,
+    ) * 0.65,
   );
   const nextMonthSpend = Math.max(monthlyItem.totalSpend - realisticSavings, 0);
   const delta = nextMonthSpend - monthlyItem.totalSpend;
@@ -242,7 +250,9 @@ function buildLocalFallbackReport(data = sourceData) {
     ],
     savingsRecommendations: savingsRecommendations.map((item) => ({
       ...item,
-      barWidth: Number(((item.expectedSavings / maxSavingsAmount) * 100).toFixed(1)),
+      barWidth: Number(
+        ((item.expectedSavings / maxSavingsAmount) * 100).toFixed(1),
+      ),
     })),
     nextMonthForecast: {
       totalSpend: nextMonthSpend,
@@ -267,7 +277,10 @@ function buildReportContext(data, yearMonth, categoryMap) {
     .map((item) => ({
       date: item.date,
       categoryId: item.categoryId,
-      categoryLabel: getCategoryLabel(categoryMap[item.categoryId], item.categoryId),
+      categoryLabel: getCategoryLabel(
+        categoryMap[item.categoryId],
+        item.categoryId,
+      ),
       type: item.type,
       price: item.price,
       memo: item.memo,
@@ -332,10 +345,7 @@ async function requestAiReport(reportContext, forecastBaseline, apiKey) {
 }
 
 function mergeAiReportWithFallback(aiReport, fallbackReport, categoryMap) {
-  const overviewSummary = normalizeStringArray(
-    aiReport?.overview?.summary,
-    5,
-  );
+  const overviewSummary = normalizeStringArray(aiReport?.overview?.summary, 5);
   const mergedSavingsItems = normalizeSavingsItems(
     aiReport?.savings?.items,
     fallbackReport.savingsRecommendations,
@@ -345,16 +355,15 @@ function mergeAiReportWithFallback(aiReport, fallbackReport, categoryMap) {
     aiReport?.forecast?.totalSpend,
     fallbackReport.nextMonthForecast.totalSpend,
   );
-  const forecastSummary = normalizeStringArray(
-    aiReport?.forecast?.summary,
-    3,
-  );
+  const forecastSummary = normalizeStringArray(aiReport?.forecast?.summary, 3);
   const delta = forecastTotalSpend - fallbackReport.totalExpense;
 
   return {
     ...fallbackReport,
     overviewSummary:
-      overviewSummary.length > 0 ? padWithFallback(overviewSummary, fallbackReport.overviewSummary, 5) : fallbackReport.overviewSummary,
+      overviewSummary.length > 0
+        ? padWithFallback(overviewSummary, fallbackReport.overviewSummary, 5)
+        : fallbackReport.overviewSummary,
     savingsRecommendations: mergedSavingsItems,
     nextMonthForecast: {
       totalSpend: forecastTotalSpend,
@@ -422,7 +431,10 @@ function normalizeSavingsItems(items, fallbackItems, categoryMap) {
         .map((item) => {
           const categoryId = item?.categoryId;
           const category = categoryMap[categoryId];
-          const expectedSavings = normalizePositiveInteger(item?.expectedSavings, 0);
+          const expectedSavings = normalizePositiveInteger(
+            item?.expectedSavings,
+            0,
+          );
           const tip = typeof item?.tip === 'string' ? item.tip.trim() : '';
 
           if (!category || expectedSavings <= 0 || !tip) {
@@ -441,7 +453,8 @@ function normalizeSavingsItems(items, fallbackItems, categoryMap) {
         .slice(0, 4)
     : [];
 
-  const targetItems = normalizedItems.length > 0 ? normalizedItems : fallbackItems;
+  const targetItems =
+    normalizedItems.length > 0 ? normalizedItems : fallbackItems;
   const maxSavingsAmount = Math.max(
     ...targetItems.map((item) => item.expectedSavings),
     1,
@@ -449,7 +462,9 @@ function normalizeSavingsItems(items, fallbackItems, categoryMap) {
 
   return targetItems.map((item) => ({
     ...item,
-    barWidth: Number(((item.expectedSavings / maxSavingsAmount) * 100).toFixed(1)),
+    barWidth: Number(
+      ((item.expectedSavings / maxSavingsAmount) * 100).toFixed(1),
+    ),
   }));
 }
 
@@ -783,8 +798,13 @@ function getLatestYearMonthFromTransactions(transactions) {
 }
 
 function collectAvailableYearMonths(transactions) {
-  return [...new Set((transactions ?? []).map((item) => item.date?.slice(0, 7)).filter(Boolean))]
-    .sort();
+  return [
+    ...new Set(
+      (transactions ?? [])
+        .map((item) => item.date?.slice(0, 7))
+        .filter(Boolean),
+    ),
+  ].sort();
 }
 
 function getYearMonth(dateString) {

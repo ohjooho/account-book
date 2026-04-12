@@ -3,11 +3,11 @@
     <header class="summary-header">
       <div class="month-selector">
         <button class="arrow-btn" @click="prevMonth">&lt;</button>
-        
+
         <h2 @click="showMonthPicker = true" class="date-title">
           {{ formattedDate }} 재무 요약
         </h2>
-        
+
         <button class="arrow-btn" @click="nextMonth">&gt;</button>
       </div>
 
@@ -25,21 +25,35 @@
       <SummaryCard
         title="총 수입"
         :amount="store.compareIncome ? store.compareIncome.right : store.income"
-        :diffAmount="store.compareIncome ? store.compareIncome.diff : store.diffIncome"
+        :diffAmount="
+          store.compareIncome ? store.compareIncome.diff : store.diffIncome
+        "
         :diffLabel="compareRangeLeft ? compareLabel : null"
         type="income"
       />
       <SummaryCard
         title="총 지출"
-        :amount="store.compareExpense ? store.compareExpense.right : store.expense"
-        :diffAmount="store.compareExpense ? store.compareExpense.diff : store.diffExpense"
+        :amount="
+          store.compareExpense ? store.compareExpense.right : store.expense
+        "
+        :diffAmount="
+          store.compareExpense ? store.compareExpense.diff : store.diffExpense
+        "
         :diffLabel="compareRangeLeft ? compareLabel : null"
         type="expense"
       />
       <SummaryCard
         title="순수익"
-        :amount="store.compareIncome && store.compareExpense ? store.compareIncome.right - store.compareExpense.right : store.netProfit"
-        :diffAmount="store.compareIncome && store.compareExpense ? store.compareIncome.diff - store.compareExpense.diff : store.diffNetProfit"
+        :amount="
+          store.compareIncome && store.compareExpense
+            ? store.compareIncome.right - store.compareExpense.right
+            : store.netProfit
+        "
+        :diffAmount="
+          store.compareIncome && store.compareExpense
+            ? store.compareIncome.diff - store.compareExpense.diff
+            : store.diffNetProfit
+        "
         :diffLabel="compareRangeLeft ? compareLabel : null"
         type="profit"
       />
@@ -59,8 +73,8 @@
       </main>
     </div>
 
-    <MonthPicker 
-      v-if="showMonthPicker" 
+    <MonthPicker
+      v-if="showMonthPicker"
       :initialDate="store.currentMonth"
       @confirm="handleMonthConfirm"
       @close="showMonthPicker = false"
@@ -129,24 +143,28 @@ const handleConfirmLeft = (range) => {
   showCalendarLeft.value = false;
   const month = range.start.split('-')[1];
   fixedCompareLabel.value = `${parseInt(month)}월`;
-  if (compareRangeRight.value) store.setCompareRange(range, compareRangeRight.value);
+  if (compareRangeRight.value)
+    store.setCompareRange(range, compareRangeRight.value);
 };
 
 const handleConfirmRight = (range) => {
   compareRangeRight.value = range;
   showCalendarRight.value = false;
-  if (compareRangeLeft.value) store.setCompareRange(compareRangeLeft.value, range);
+  if (compareRangeLeft.value)
+    store.setCompareRange(compareRangeLeft.value, range);
 };
 
 const leftLabel = computed(() => {
-  if (compareRangeLeft.value) return `${compareRangeLeft.value.start} ~ ${compareRangeLeft.value.end}`;
+  if (compareRangeLeft.value)
+    return `${compareRangeLeft.value.start} ~ ${compareRangeLeft.value.end}`;
   const [y, m] = store.currentMonth.split('-').map(Number);
   const prevDate = new Date(y, m - 2);
   return `${prevDate.getFullYear()}년 ${prevDate.getMonth() + 1}월`;
 });
 
 const rightLabel = computed(() => {
-  if (compareRangeRight.value) return `${compareRangeRight.value.start} ~ ${compareRangeRight.value.end}`;
+  if (compareRangeRight.value)
+    return `${compareRangeRight.value.start} ~ ${compareRangeRight.value.end}`;
   return formattedDate.value;
 });
 
@@ -167,88 +185,87 @@ const compareLabel = computed(() => {
 </script>
 
 <style scoped>
-
-.loading-overlay { 
-  text-align: center; 
-  color: #0052cc; 
-  font-weight: bold; 
-  margin-bottom: 10px; }
-.monthly-summary-container { 
+.loading-overlay {
+  text-align: center;
+  color: #0052cc;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.monthly-summary-container {
   box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
   border: 1px solid #ececf1;
-  padding: 20px 10px; 
+  padding: 20px 10px;
   background: #fff;
-  min-height: 100vh; 
+  min-height: 100vh;
   border-radius: 17px;
-  width: 100%; 
-  box-sizing: border-box; 
+  width: 100%;
+  box-sizing: border-box;
 }
-.summary-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 25px; 
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
 }
 .month-selector {
-  display: flex; 
-  align-items: center; 
-  gap: 15px; 
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
-.date-title { 
-  margin: 0; 
-  font-size: 30px; 
-  font-weight: 800; 
-  cursor: pointer; 
-  color: #111827; 
+.date-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  cursor: pointer;
+  color: #111827;
 }
-.arrow-btn { 
-  background: none; 
-  border: none; 
-  cursor: pointer; 
-  font-size: 20px; 
-  color: #000; 
-  font-weight: bold; 
+.arrow-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #000;
+  font-weight: bold;
 }
-.card-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-  gap: 20px; 
-  margin-bottom: 30px; 
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
   font-size: 15px;
   font-weight: 700;
 }
-.budget-section { 
-  margin-bottom: 10px; 
+.budget-section {
+  margin-bottom: 10px;
 }
-.details-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-  gap: 40px; 
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 40px;
 }
-.category-list-area h3 { 
-  font-size: 18px; 
-  margin-bottom: 20px; 
-  font-weight: 700; 
+.category-list-area h3 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 700;
 }
-.badge { 
-  background: #eee; 
+.badge {
+  background: #eee;
   padding: 2px 8px;
-  border-radius: 4px; 
-  font-size: 12px; 
-  margin-right: 8px; 
+  border-radius: 4px;
+  font-size: 12px;
+  margin-right: 8px;
 }
-.comparison-picker { 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
+.comparison-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.comparison-picker button { 
-  background: #fff; 
-  border: 1px solid #ddd; 
-  padding: 5px 12px; 
-  border-radius: 6px; 
-  cursor: pointer; 
-  font-size: 13px; 
-  }
-  
+.comparison-picker button {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
 </style>

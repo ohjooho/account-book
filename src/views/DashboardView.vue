@@ -37,7 +37,11 @@
           <path class="summary-wave-fill" :d="card.waveFillPath" />
         </svg>
 
-        <div v-if="card.waveType" class="summary-wave-base" aria-hidden="true" />
+        <div
+          v-if="card.waveType"
+          class="summary-wave-base"
+          aria-hidden="true"
+        />
       </article>
 
       <article
@@ -49,7 +53,10 @@
         @keydown.space.prevent="goToMonthly"
       >
         <div class="panel-shell panel-shell--monthly">
-          <div v-if="isMonthlySummaryLoading" class="loading-state dashboard-loading-state">
+          <div
+            v-if="isMonthlySummaryLoading"
+            class="loading-state dashboard-loading-state"
+          >
             <div class="loading-spinner" />
             <p class="loading-text">월별 재정요약을 불러오고 있어요.</p>
           </div>
@@ -71,7 +78,9 @@
                     :style="{ backgroundColor: category.color }"
                   />
                   <span class="monthly-legend-name">{{ category.name }}</span>
-                  <span class="monthly-legend-value">{{ category.share }}%</span>
+                  <span class="monthly-legend-value"
+                    >{{ category.share }}%</span
+                  >
                 </div>
               </div>
             </div>
@@ -92,7 +101,10 @@
         @keydown.space.prevent="goToReport"
       >
         <div class="panel-shell panel-shell--insight">
-          <div v-if="isAiReportLoading" class="loading-state dashboard-loading-state">
+          <div
+            v-if="isAiReportLoading"
+            class="loading-state dashboard-loading-state"
+          >
             <div class="loading-spinner" />
             <p class="loading-text">AI가 소비 분석 요약을 불러오고 있어요.</p>
           </div>
@@ -159,7 +171,9 @@
                     <span
                       class="dashboard-category-badge"
                       :style="{
-                        backgroundColor: getCategoryColor(transaction.categoryId),
+                        backgroundColor: getCategoryColor(
+                          transaction.categoryId,
+                        ),
                       }"
                     >
                       {{ getCategoryLabel(transaction.categoryId) }}
@@ -213,7 +227,9 @@
           <div class="map-preview-header">
             <div>
               <p class="map-preview-title">소비 지도</p>
-              <p class="map-preview-caption">최근 소비 위치를 지도에서 빠르게 볼 수 있어요.</p>
+              <p class="map-preview-caption">
+                최근 소비 위치를 지도에서 빠르게 볼 수 있어요.
+              </p>
             </div>
           </div>
 
@@ -242,7 +258,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import sourceData from '../../data2.json';
+import sourceData from '../../data.json';
 
 import { getReportData } from '@/services/report';
 import { useCategoryStore } from '@/stores/category';
@@ -365,16 +381,15 @@ const liveTransactions = computed(() =>
 );
 
 const recentTransactions = computed(() =>
-  [...transactionsStore.transactions]
-    .sort((left, right) => {
-      const dateCompare = String(right.date).localeCompare(String(left.date));
+  [...transactionsStore.transactions].sort((left, right) => {
+    const dateCompare = String(right.date).localeCompare(String(left.date));
 
-      if (dateCompare !== 0) {
-        return dateCompare;
-      }
+    if (dateCompare !== 0) {
+      return dateCompare;
+    }
 
-      return String(right.id).localeCompare(String(left.id));
-    }),
+    return String(right.id).localeCompare(String(left.id));
+  }),
 );
 
 const mapPreviewTransactions = computed(() =>
@@ -403,14 +418,18 @@ const mapFocusTransactions = computed(() => {
   const maxLatDiff = 0.015;
   const maxLngDiff = 0.02;
 
-  const nearbyTransactions = mapPreviewTransactions.value.filter((transaction) => {
-    const latDiff = Math.abs(transaction.location.lat - anchor.lat);
-    const lngDiff = Math.abs(transaction.location.lng - anchor.lng);
+  const nearbyTransactions = mapPreviewTransactions.value.filter(
+    (transaction) => {
+      const latDiff = Math.abs(transaction.location.lat - anchor.lat);
+      const lngDiff = Math.abs(transaction.location.lng - anchor.lng);
 
-    return latDiff <= maxLatDiff && lngDiff <= maxLngDiff;
-  });
+      return latDiff <= maxLatDiff && lngDiff <= maxLngDiff;
+    },
+  );
 
-  return nearbyTransactions.length > 0 ? nearbyTransactions : [mapPreviewTransactions.value[0]];
+  return nearbyTransactions.length > 0
+    ? nearbyTransactions
+    : [mapPreviewTransactions.value[0]];
 });
 
 onMounted(async () => {
@@ -426,7 +445,8 @@ onMounted(async () => {
       isAiReportLoading.value = false;
     });
 
-  const monthlyPromise = monthlyStore.fetchAll()
+  const monthlyPromise = monthlyStore
+    .fetchAll()
     .catch((error) => {
       console.error('Failed to load dashboard monthly summary preview.', error);
     })
@@ -532,7 +552,11 @@ async function initDashboardMapPreview() {
 }
 
 function renderDashboardMapPreview() {
-  if (!dashboardMap.value || !window.kakao?.maps || !mapFocusTransactions.value.length) {
+  if (
+    !dashboardMap.value ||
+    !window.kakao?.maps ||
+    !mapFocusTransactions.value.length
+  ) {
     return;
   }
 
@@ -549,7 +573,9 @@ function renderDashboardMapPreview() {
     const marker = new window.kakao.maps.Marker({
       map: dashboardMap.value,
       position,
-      image: createDashboardMarkerImage(categoryColorMap[transaction.categoryId] ?? '#4474FF'),
+      image: createDashboardMarkerImage(
+        categoryColorMap[transaction.categoryId] ?? '#4474FF',
+      ),
     });
 
     dashboardMapMarkers.value.push(marker);
@@ -562,7 +588,10 @@ function renderDashboardMapPreview() {
     const onlyItem = mapFocusTransactions.value[0];
     dashboardMap.value.setLevel(4);
     dashboardMap.value.panTo(
-      new window.kakao.maps.LatLng(onlyItem.location.lat, onlyItem.location.lng),
+      new window.kakao.maps.LatLng(
+        onlyItem.location.lat,
+        onlyItem.location.lng,
+      ),
     );
     return;
   }

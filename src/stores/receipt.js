@@ -16,7 +16,6 @@ export const useReceiptStore = defineStore('receipt', () => {
       receiptDraft.value = response.data;
       return response.data;
     } catch (e) {
-      console.log(e);
       console.error('receiptDraft 조회 실패:', e);
       throw e;
     }

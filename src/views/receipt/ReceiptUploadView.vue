@@ -37,6 +37,12 @@ const router = useRouter();
 const receiptStore = useReceiptStore();
 const fileInput = ref(null);
 const loading = ref(false);
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+];
 
 const openFilePicker = () => {
   if (loading.value) return;
@@ -156,15 +162,42 @@ const analyzeReceiptWithOpenAI = async (file) => {
   };
 };
 
+// AI 분석 실패했을 경우
+const isReceiptAnalysisFailed = (aiResult) => {
+  const today = new Date().toISOString().slice(0, 10);
+
+  return (
+    aiResult.categoryId === 'etc' &&
+    aiResult.memo === '' &&
+    aiResult.price === 0 &&
+    aiResult.type === 'expense' &&
+    aiResult.place === '' &&
+    aiResult.products.length === 0
+  );
+};
+
 const handleFileChange = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
+
+  // 파일 형식 검사
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    alert('이미지 파일은 JPG, PNG, GIF, WEBP 형식만 업로드할 수 있습니다.');
+    event.target.value = '';
+    return;
+  }
 
   loading.value = true;
 
   try {
     // AI 분석하기
     const draftData = await analyzeReceiptWithOpenAI(file);
+    // 영수증 분석 실패 검사
+    if (isReceiptAnalysisFailed(draftData.aiResult)) {
+      alert('영수증 분석에 실패했습니다. 다른 영수증 이미지를 첨부해주세요.');
+      return;
+    }
+
     // Data에 분석한 내용 receiptDraft에 저장하기
     const savedDraft = await receiptStore.saveReceiptDraft(draftData);
     // 페이지 이동

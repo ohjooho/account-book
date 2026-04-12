@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:api": "npx json-server data2.json --port 3000",
+    "dev:api": "npx json-server data.json --port 3000",
     "build": "vite build",
     "preview": "vite preview",
     "upload": "node server.js"
