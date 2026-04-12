@@ -4,6 +4,7 @@ import axios from 'axios';
 
 export const useTransactionsStore = defineStore('transactions', () => {
   const BASEURI = '/api/transactions';
+  const RECEIPTURI = '/api/receipts';
   const transactions = ref([]);
 
   //거래 목록 조회(tran-001)
@@ -61,6 +62,21 @@ export const useTransactionsStore = defineStore('transactions', () => {
   // 거래 삭제 (tran-005)
   const deleteTransactions = async (id) => {
     try {
+      const receiptResponse = await axios.get(RECEIPTURI);
+      const matchedReceipt = receiptResponse.data.find(
+        (r) => String(r.transactionRef) === String(id),
+      );
+
+      if (matchedReceipt?.imageUrl) {
+        await axios.delete('http://localhost:3001/upload', {
+          data: { imagePath: matchedReceipt.imageUrl },
+        });
+      }
+
+      if (matchedReceipt) {
+        await axios.delete(`${RECEIPTURI}/${matchedReceipt.id}`);
+      }
+
       await axios.delete(`${BASEURI}/${id}`);
       transactions.value = transactions.value.filter(
         (t) => String(t.id) !== String(id),

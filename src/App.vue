@@ -2,7 +2,7 @@
   <div class="account-viewport">
     <header class="account-header">
       <div class="header-content">
-        <div class="logo-area">
+        <div class="logo-area" @click="goMain()">
           <img
             :src="getAssetUrl('Book.png')"
             alt="드롭스"
@@ -10,11 +10,6 @@
           />
           <h1 class="header-title">드롭스</h1>
         </div>
-        <img
-          :src="getAssetUrl('account_circle.png')"
-          alt="프로필"
-          class="profile-icon"
-        />
       </div>
     </header>
 
@@ -50,7 +45,9 @@
       </main>
     </div>
     <!-- 플로팅 + 버튼 -->
-    <button class="floating-add-button" @click="goToCreate">+</button>
+    <button class="floating-add-button" @click="goToCreate">
+      <span class="button-text">+</span>
+    </button>
   </div>
 </template>
 
@@ -105,6 +102,10 @@ const getMenuIcon = (baseName, isHighlighted) => {
 const goToCreate = () => {
   router.push('/transactions/new');
 };
+
+const goMain = () => {
+  router.push('/');
+};
 </script>
 
 <style scoped>
@@ -148,6 +149,7 @@ const goToCreate = () => {
 .logo-area {
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .header-logo {
@@ -262,8 +264,6 @@ const goToCreate = () => {
   background-color: #f8b333;
   color: #ffffff;
   border: none;
-  font-size: 32px;
-  font-weight: 300;
   cursor: pointer;
   z-index: 1000;
 }
@@ -273,6 +273,11 @@ const goToCreate = () => {
 }
 .floating-add-button:active {
   transform: scale(0.95);
+}
+.button-text {
+  color: white;
+  font-size: 40px;
+  font-weight: 500;
 }
 
 @media (max-width: 1024px) {

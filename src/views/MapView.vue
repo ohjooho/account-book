@@ -92,7 +92,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import DatePicker from '@/components/DatePicker.vue';
 import { loadKakaoScript } from '@/utils/kakaoMap';
-import data2 from '../../data2.json';
+import jsonData from '../../data.json';
 
 const router = useRouter();
 
@@ -160,7 +160,7 @@ const maxDateString = computed(() => formatDate(today.value));
 const categories = computed(() => {
   return [
     { key: 'all', label: '전체', color: '#4474FF', type: 'all' },
-    ...data2.categories.map((category) => ({
+    ...jsonData.categories.map((category) => ({
       key: category.id,
       label: category.labelKo,
       color: category.color?.startsWith('#')
@@ -172,7 +172,7 @@ const categories = computed(() => {
 });
 
 function getCategoryInfo(categoryId) {
-  return data2.categories.find((category) => category.id === categoryId);
+  return jsonData.categories.find((category) => category.id === categoryId);
 }
 
 function getMarkerIcon(item) {
@@ -224,13 +224,13 @@ async function loadLiveTransactions() {
     }
 
     const data = await response.json();
-    return Array.isArray(data) ? data : data2.transactions;
+    return Array.isArray(data) ? data : jsonData.transactions;
   } catch (error) {
     console.warn(
       'Failed to load live transactions for map view. Falling back to bundled data.',
       error,
     );
-    return data2.transactions;
+    return jsonData.transactions;
   }
 }
 
@@ -274,10 +274,7 @@ function goToTransactionDetail() {
   if (!selectedItem.value?.id) return;
 
   router.push({
-    path: '/transactions',
-    query: {
-      selectedId: selectedItem.value.id,
-    },
+    path: `/transactions/${selectedItem.value.id}`,
   });
 }
 
