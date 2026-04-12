@@ -829,86 +829,9 @@
       "id": "202604050002"
     },
     {
-      "date": "2013-09-22",
-      "categoryId": "food",
-      "memo": "한돈당에서 생삼겹살, 맥주, 음료수, 밥+된장 구매",
-      "price": 217000,
-      "type": "expense",
-      "place": "한돈당",
-      "location": {
-        "lat": 35.7013250317064,
-        "lng": 129.329100973344
-      },
-      "products": [
-        "생삼겹살",
-        "맥주",
-        "음료수",
-        "밥+된장"
-      ],
-      "receiptRef": 202604104286,
-      "id": "2Yyz4zOyBGY"
-    },
-    {
-      "date": "2013-09-22",
-      "categoryId": "food",
-      "memo": "한돈당에서 생삼겹살, 맥주, 음료수, 밥+된장 구매",
-      "price": 217000,
-      "type": "expense",
-      "place": "한돈당",
-      "location": {
-        "lat": 35.7013250317064,
-        "lng": 129.329100973344
-      },
-      "products": [
-        "생삼겹살",
-        "맥주",
-        "음료수",
-        "밥+된장"
-      ],
-      "receiptRef": "YTRmk2DY9sc",
-      "id": "ArGbfSpxcIE"
-    },
-    {
-      "date": "2013-09-22",
-      "categoryId": "food",
-      "memo": "한돈당에서 생삼겹살, 맥주, 음료수, 벌사된장 구매",
-      "price": 217000,
-      "type": "expense",
-      "place": "한돈당",
-      "location": {
-        "lat": 35.7013250317064,
-        "lng": 129.329100973344
-      },
-      "products": [
-        "생삼겹살",
-        "맥주",
-        "음료수",
-        "벌사된장"
-      ],
-      "receiptRef": 202604112179,
-      "id": "3vY1bFQoeKA"
-    },
-    {
-      "type": "income",
-      "date": "2026-04-12",
-      "price": 30000000000000,
-      "categoryId": "income",
-      "memo": "ㅇㅊㅇㅈㅂㅇ",
-      "place": "ㅇㅂㅈ",
-      "products": [
-        "ㅂㅈㅇ"
-      ],
-      "location": {
-        "lat": null,
-        "lng": null
-      },
-      "receiptRef": "",
-      "id": "cBb8Zfunjf8"
-    },
-    {
       "type": "expense",
       "date": "2026-04-12",
-      "price": 300000000000,
+      "price": 30000,
       "categoryId": "subscription",
       "memo": "ㅁㄴㅇ",
       "place": "서현역 쌀통닭",
@@ -921,26 +844,6 @@
       },
       "receiptRef": "",
       "id": "U_wzxHuNZVM"
-    },
-    {
-      "date": "2013-09-22",
-      "categoryId": "food",
-      "memo": "한돈당에서 생삼겹살, 맥주, 음료수, 밥+된장 구매",
-      "price": 217000,
-      "type": "expense",
-      "place": "한돈당",
-      "location": {
-        "lat": 35.7013250317064,
-        "lng": 129.329100973344
-      },
-      "products": [
-        "생삼겹살",
-        "맥주",
-        "음료수",
-        "밥+된장"
-      ],
-      "receiptRef": 202604117807,
-      "id": "y03uUpRKqXI"
     }
   ],
   "receipts": [
@@ -1002,28 +905,28 @@
     },
     {
       "id": "n5grLaWjpxE",
-      "transactionId": "2Yyz4zOyBGY",
+      "transactionId": null,
       "imageUrl": "/uploads/receipt/202604104286_1775807114317.jpg",
       "ocrRawText": "한돈당 610-09-74049 TEL: (054) 777-3770 임부옥 경북 경주시 외동읍 구어리 172-2 테이블 : [룸2] 33 메뉴 단가 수량 금액 생삼겹살 7,000 25 175,000 맥주 3,000 4 12,000 음료수 1,000 4 4,000 밥+된장 2,000 13 26,000 합계 : 217,000 받은금액 : 217,000 받은금액 : 0 주문자 : 2013/09/22 15:56 고객수 : 0",
       "createdAt": "2026-04-10T16:45:20.185+09:00"
     },
     {
       "id": "YTRmk2DY9sc",
-      "transactionId": "ArGbfSpxcIE",
+      "transactionId": null,
       "imageUrl": "/uploads/receipt/202604100530_1775810690551.jpg",
       "ocrRawText": "[ 중간계산서 ] 한돈당 610-09-74049 TEL : (054) 777-3770 임부옥 경북 경주시 외동읍 구어리 172-2 테이블 : [품2] 33 메뉴 단가 수량 금액 생삼겹살 7,000 25 175,000 맥주 3,000 4 12,000 음료수 1,000 4 4,000 밥+된장 2,000 13 26,000 합계: 217,000 받으실액: 217,000 받으실금액: 0 주문자: 2013/09/22 15:56 고객수: 0",
       "createdAt": "2026-04-10T17:44:58.153+09:00"
     },
     {
       "id": "R9YTZrzqmsY",
-      "transactionId": "3vY1bFQoeKA",
+      "transactionId": null,
       "imageUrl": "/uploads/receipt/202604112179_1775888722196.jpg",
       "ocrRawText": "한돈당\n610-09-74049 TEL: (054) 777-3770 임부옥\n경북 경주시 외동읍 구어리 172-2\n테이블 : [룸2] 33\n메뉴 단가 수량 금액\n생삼겹살 7,000 25 175,000\n맥주 3,000 4 12,000\n음료수 1,000 4 4,000\n벌사된장 2,000 13 26,000\n합 계 : 217,000\n받은금액 : 217,000\n받은금액 : 0\n주문자: 2013/09/22 15:56\n고객수: 0",
       "createdAt": "2026-04-11T15:25:27.046+09:00"
     },
     {
       "id": "DNXo5x_uTmY",
-      "transactionId": "y03uUpRKqXI",
+      "transactionId": null,
       "imageUrl": "/uploads/receipt/202604117807_1775934287835.jpg",
       "ocrRawText": "[ 중간계산서 ]\n한돈당\n610-09-74049 TEL: (054) 777-3770 임부옥\n경북 경주시 외동읍 구어리 172-2\n테이블 : [룸2] 33\n메뉴 단가 수량 금액\n생삼겹살 7,000 25 175,000\n맥주 3,000 4 12,000\n음료수 1,000 4 4,000\n밥+된장 2,000 13 26,000\n합 계 : 217,000\n받은금액 : 217,000\n받은금액 : 0\n주문자 : 2013/09/22 15:56\n고객수 : 0",
       "createdAt": "2026-04-12T04:04:53.027+09:00"
