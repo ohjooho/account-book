@@ -235,7 +235,7 @@ const loadReceipt = async (transaction) => {
     try {
       const response = await request();
       const payload = Array.isArray(response.data)
-        ? response.data[0] ?? null
+        ? (response.data[0] ?? null)
         : response.data;
 
       if (payload) {
@@ -283,7 +283,7 @@ onMounted(async () => {
   };
 
   // ===== 영수증 불러오기 (receiptRef가 있을 때만) =====
-  await loadReceipt(transaction);
+  if (transaction.receiptRef) await loadReceipt(transaction);
 });
 
 // ===== 에러 상태 관리 변수 추가 =====

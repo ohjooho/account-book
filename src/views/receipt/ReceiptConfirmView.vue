@@ -310,7 +310,7 @@ const receiptSave = async () => {
     };
     const newReceipt = {
       id: payload.id ?? new Date().getTime(),
-      transactionId: trans.id,
+      transactionRef: trans.id,
       imageUrl: payload.imageUrl,
       ocrRawText: payload.ocrRawText ?? '',
       createdAt: getKoreaISOString(),
@@ -327,7 +327,7 @@ const receiptSave = async () => {
 
     // 페이지 이동
     alert('저장이 완료되었습니다.');
-    router.push(`/transactions/${savedReceipt.transactionId}`);
+    router.push(`/transactions/${savedReceipt.transactionRef}`);
   } catch (error) {
     console.error(error);
     formErrorMessage.value = error.message || '저장 중 오류가 발생했습니다.';

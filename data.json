@@ -5,7 +5,11 @@
     "sourceOfTruth": "transactions",
     "latestClosedMonth": "2026-03",
     "latestMonthInProgress": "2026-04",
-    "availableYearMonths": ["2026-02", "2026-03", "2026-04"],
+    "availableYearMonths": [
+      "2026-02",
+      "2026-03",
+      "2026-04"
+    ],
     "notes": [
       "dailyCashflow and monthlyCashflow are summary views generated from transactions.",
       "2026-04 monthlyCashflow reflects data from 2026-04-01 to 2026-04-08 only."
@@ -17,7 +21,7 @@
       "name": "income",
       "labelKo": "수입",
       "type": "income",
-      "color": "FF5E13"
+      "color": "#FF5E13"
     },
     {
       "id": "living",
@@ -71,910 +75,1226 @@
   ],
   "transactions": [
     {
-      "id": 202602010001,
+      "id": "202602010001",
       "date": "2026-02-01",
       "categoryId": "income",
       "memo": "2월 급여 입금",
       "price": 3000000,
       "type": "income",
       "place": "KB국민은행 입금",
-      "location": { "lat": 37.5665, "lng": 126.978 },
-      "products": ["월급"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "products": [
+        "월급"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602010002,
+      "id": "202602010002",
       "date": "2026-02-01",
       "categoryId": "living",
       "memo": "2월 월세 납부",
       "price": 750000,
       "type": "expense",
       "place": "신촌 오피스텔",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["월세"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "월세"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602030001,
+      "id": "202602030001",
       "date": "2026-02-03",
       "categoryId": "subscription",
       "memo": "넷플릭스 정기결제",
       "price": 17000,
       "type": "expense",
       "place": "Netflix",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["Netflix Premium"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "Netflix Premium"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602050001,
+      "id": "202602050001",
       "date": "2026-02-05",
       "categoryId": "food",
       "memo": "점심 샌드위치와 커피",
       "price": 14500,
       "type": "expense",
       "place": "스타벅스 신촌점",
-      "location": { "lat": 37.5563, "lng": 126.9385 },
-      "products": ["카페라떼", "샌드위치"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5563,
+        "lng": 126.9385
+      },
+      "products": [
+        "카페라떼",
+        "샌드위치"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602060001,
+      "id": "202602060001",
       "date": "2026-02-06",
       "categoryId": "living",
       "memo": "전기·수도 요금",
       "price": 89000,
       "type": "expense",
       "place": "도시가스/전기요금",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["전기요금", "수도요금"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "전기요금",
+        "수도요금"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602070001,
+      "id": "202602070001",
       "date": "2026-02-07",
       "categoryId": "transport",
       "memo": "교통카드 충전",
       "price": 55000,
       "type": "expense",
       "place": "신촌역",
-      "location": { "lat": 37.5551, "lng": 126.9368 },
-      "products": ["티머니 충전"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5551,
+        "lng": 126.9368
+      },
+      "products": [
+        "티머니 충전"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602110001,
+      "id": "202602110001",
       "date": "2026-02-11",
       "categoryId": "shopping",
       "memo": "전공서적 구매",
       "price": 58000,
       "type": "expense",
       "place": "교보문고 광화문점",
-      "location": { "lat": 37.5716, "lng": 126.9768 },
-      "products": ["전공서적"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5716,
+        "lng": 126.9768
+      },
+      "products": [
+        "전공서적"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602130001,
+      "id": "202602130001",
       "date": "2026-02-13",
       "categoryId": "food",
       "memo": "친구와 저녁 약속",
       "price": 22000,
       "type": "expense",
       "place": "연남동 파스타집",
-      "location": { "lat": 37.5627, "lng": 126.9236 },
-      "products": ["파스타", "에이드"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5627,
+        "lng": 126.9236
+      },
+      "products": [
+        "파스타",
+        "에이드"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602140001,
+      "id": "202602140001",
       "date": "2026-02-14",
       "categoryId": "subscription",
       "memo": "유튜브 프리미엄 결제",
       "price": 14900,
       "type": "expense",
       "place": "YouTube Premium",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["YouTube Premium"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "YouTube Premium"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602180001,
+      "id": "202602180001",
       "date": "2026-02-18",
       "categoryId": "medical",
       "memo": "감기약 구매",
       "price": 12400,
       "type": "expense",
       "place": "세브란스약국",
-      "location": { "lat": 37.5635, "lng": 126.9392 },
-      "products": ["감기약", "비타민C"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5635,
+        "lng": 126.9392
+      },
+      "products": [
+        "감기약",
+        "비타민C"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602200001,
+      "id": "202602200001",
       "date": "2026-02-20",
       "categoryId": "food",
       "memo": "주말 장보기",
       "price": 68000,
       "type": "expense",
       "place": "이마트 신촌점",
-      "location": { "lat": 37.5567, "lng": 126.9407 },
-      "products": ["우유", "계란", "과일", "간편식"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5567,
+        "lng": 126.9407
+      },
+      "products": [
+        "우유",
+        "계란",
+        "과일",
+        "간편식"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602210001,
+      "id": "202602210001",
       "date": "2026-02-21",
       "categoryId": "transport",
       "memo": "늦은 귀가 택시",
       "price": 18200,
       "type": "expense",
       "place": "카카오T",
-      "location": { "lat": 37.5583, "lng": 126.9369 },
-      "products": ["택시"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5583,
+        "lng": 126.9369
+      },
+      "products": [
+        "택시"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602220001,
+      "id": "202602220001",
       "date": "2026-02-22",
       "categoryId": "shopping",
       "memo": "운동화 구매",
       "price": 129000,
       "type": "expense",
       "place": "ABC마트 홍대점",
-      "location": { "lat": 37.556, "lng": 126.9232 },
-      "products": ["러닝화"],
-      "receiptId": null
+      "location": {
+        "lat": 37.556,
+        "lng": 126.9232
+      },
+      "products": [
+        "러닝화"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602250001,
+      "id": "202602250001",
       "date": "2026-02-25",
       "categoryId": "etc",
       "memo": "친구 생일선물",
       "price": 35000,
       "type": "expense",
       "place": "카카오 선물하기",
-      "location": { "lat": 37.5665, "lng": 126.978 },
-      "products": ["기프티콘"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "products": [
+        "기프티콘"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202602280001,
+      "id": "202602280001",
       "date": "2026-02-28",
       "categoryId": "food",
       "memo": "주말 카페",
       "price": 6900,
       "type": "expense",
       "place": "메가커피 연세대점",
-      "location": { "lat": 37.5623, "lng": 126.9365 },
-      "products": ["아메리카노"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5623,
+        "lng": 126.9365
+      },
+      "products": [
+        "아메리카노"
+      ],
+      "receiptRef": ""
     },
-
     {
-      "id": 202603010001,
+      "id": "202603010001",
       "date": "2026-03-01",
       "categoryId": "income",
       "memo": "3월 급여 입금",
       "price": 3000000,
       "type": "income",
       "place": "KB국민은행 입금",
-      "location": { "lat": 37.5665, "lng": 126.978 },
-      "products": ["월급"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "products": [
+        "월급"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603010002,
+      "id": "202603010002",
       "date": "2026-03-01",
       "categoryId": "living",
       "memo": "3월 월세 납부",
       "price": 750000,
       "type": "expense",
       "place": "신촌 오피스텔",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["월세"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "월세"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603030001,
+      "id": "202603030001",
       "date": "2026-03-03",
       "categoryId": "subscription",
       "memo": "넷플릭스 정기결제",
       "price": 17000,
       "type": "expense",
       "place": "Netflix",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["Netflix Premium"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "Netflix Premium"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603040001,
+      "id": "202603040001",
       "date": "2026-03-04",
       "categoryId": "food",
       "memo": "학생회관 아침식사",
       "price": 9800,
       "type": "expense",
       "place": "연세대학교 학생회관",
-      "location": { "lat": 37.564, "lng": 126.939 },
-      "products": ["김밥", "두유"],
-      "receiptId": null
+      "location": {
+        "lat": 37.564,
+        "lng": 126.939
+      },
+      "products": [
+        "김밥",
+        "두유"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603060001,
+      "id": "202603060001",
       "date": "2026-03-06",
       "categoryId": "living",
       "memo": "관리비와 공과금",
       "price": 97000,
       "type": "expense",
       "place": "오피스텔 관리사무소",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["관리비", "전기요금"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "관리비",
+        "전기요금"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603070001,
+      "id": "202603070001",
       "date": "2026-03-07",
       "categoryId": "transport",
       "memo": "교통카드 충전",
       "price": 55000,
       "type": "expense",
       "place": "신촌역",
-      "location": { "lat": 37.5551, "lng": 126.9368 },
-      "products": ["티머니 충전"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5551,
+        "lng": 126.9368
+      },
+      "products": [
+        "티머니 충전"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603080001,
+      "id": "202603080001",
       "date": "2026-03-08",
       "categoryId": "shopping",
       "memo": "생활용품 구매",
       "price": 42000,
       "type": "expense",
       "place": "다이소 신촌점",
-      "location": { "lat": 37.5567, "lng": 126.9383 },
-      "products": ["수납함", "세제", "휴지"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5567,
+        "lng": 126.9383
+      },
+      "products": [
+        "수납함",
+        "세제",
+        "휴지"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603100001,
+      "id": "202603100001",
       "date": "2026-03-10",
       "categoryId": "etc",
       "memo": "동아리 회비",
       "price": 25000,
       "type": "expense",
       "place": "연세대학교 동아리",
-      "location": { "lat": 37.565, "lng": 126.9386 },
-      "products": ["회비"],
-      "receiptId": null
+      "location": {
+        "lat": 37.565,
+        "lng": 126.9386
+      },
+      "products": [
+        "회비"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603120001,
+      "id": "202603120001",
       "date": "2026-03-12",
       "categoryId": "food",
       "memo": "친구와 점심",
       "price": 18500,
       "type": "expense",
       "place": "신촌 덮밥집",
-      "location": { "lat": 37.5558, "lng": 126.9361 },
-      "products": ["덮밥", "음료"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5558,
+        "lng": 126.9361
+      },
+      "products": [
+        "덮밥",
+        "음료"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603140001,
+      "id": "202603140001",
       "date": "2026-03-14",
       "categoryId": "subscription",
       "memo": "음악 스트리밍 결제",
       "price": 10900,
       "type": "expense",
       "place": "Melon",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["Melon 정기결제"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "Melon 정기결제"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603150001,
+      "id": "202603150001",
       "date": "2026-03-15",
       "categoryId": "medical",
       "memo": "치과 스케일링",
       "price": 32000,
       "type": "expense",
       "place": "신촌 연세치과",
-      "location": { "lat": 37.5578, "lng": 126.9391 },
-      "products": ["스케일링"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5578,
+        "lng": 126.9391
+      },
+      "products": [
+        "스케일링"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603170001,
+      "id": "202603170001",
       "date": "2026-03-17",
       "categoryId": "food",
       "memo": "야식 배달",
       "price": 27900,
       "type": "expense",
       "place": "배달의민족",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["치킨", "콜라"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "치킨",
+        "콜라"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603190001,
+      "id": "202603190001",
       "date": "2026-03-19",
       "categoryId": "shopping",
       "memo": "봄 자켓 구매",
       "price": 158000,
       "type": "expense",
       "place": "무신사 스토어",
-      "location": { "lat": 37.5572, "lng": 126.9245 },
-      "products": ["봄 자켓"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5572,
+        "lng": 126.9245
+      },
+      "products": [
+        "봄 자켓"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603200001,
+      "id": "202603200001",
       "date": "2026-03-20",
       "categoryId": "medical",
       "memo": "영양제 구매",
       "price": 28000,
       "type": "expense",
       "place": "올리브영 신촌점",
-      "location": { "lat": 37.5569, "lng": 126.9374 },
-      "products": ["비타민", "유산균"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5569,
+        "lng": 126.9374
+      },
+      "products": [
+        "비타민",
+        "유산균"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603210001,
+      "id": "202603210001",
       "date": "2026-03-21",
       "categoryId": "subscription",
       "memo": "클라우드 저장공간 결제",
       "price": 4900,
       "type": "expense",
       "place": "Google One",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["Google One"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "Google One"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603240001,
-      "date": "2026-03-24",
-      "categoryId": "food",
-      "memo": "주간 장보기",
-      "price": 72000,
-      "type": "expense",
-      "place": "이마트 신촌점",
-      "location": { "lat": 37.5567, "lng": 126.9407 },
-      "products": ["우유", "계란", "샐러드", "요거트"],
-      "receiptId": 202603240901
-    },
-    {
-      "id": 202603250001,
+      "id": "202603250001",
       "date": "2026-03-25",
       "categoryId": "transport",
       "memo": "본가 방문 KTX",
       "price": 45800,
       "type": "expense",
       "place": "서울역",
-      "location": { "lat": 37.5547, "lng": 126.9706 },
-      "products": ["KTX 승차권"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5547,
+        "lng": 126.9706
+      },
+      "products": [
+        "KTX 승차권"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603270001,
+      "id": "202603270001",
       "date": "2026-03-27",
       "categoryId": "shopping",
       "memo": "화장품 보충 구매",
       "price": 38000,
       "type": "expense",
       "place": "올리브영 홍대점",
-      "location": { "lat": 37.5575, "lng": 126.924 },
-      "products": ["스킨", "립밤"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5575,
+        "lng": 126.924
+      },
+      "products": [
+        "스킨",
+        "립밤"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603290001,
+      "id": "202603290001",
       "date": "2026-03-29",
       "categoryId": "food",
       "memo": "주말 브런치",
       "price": 16500,
       "type": "expense",
       "place": "연남 브런치 카페",
-      "location": { "lat": 37.5625, "lng": 126.9233 },
-      "products": ["프렌치토스트", "커피"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5625,
+        "lng": 126.9233
+      },
+      "products": [
+        "프렌치토스트",
+        "커피"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202603300001,
+      "id": "202603300001",
       "date": "2026-03-30",
       "categoryId": "etc",
       "memo": "편의점 간식",
       "price": 8300,
       "type": "expense",
       "place": "GS25 연세대점",
-      "location": { "lat": 37.5631, "lng": 126.9369 },
-      "products": ["삼각김밥", "음료"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5631,
+        "lng": 126.9369
+      },
+      "products": [
+        "삼각김밥",
+        "음료"
+      ],
+      "receiptRef": ""
     },
-
     {
-      "id": 202604010001,
+      "id": "202604010001",
       "date": "2026-04-01",
       "categoryId": "income",
       "memo": "4월 급여 입금",
       "price": 3000000,
       "type": "income",
       "place": "KB국민은행 입금",
-      "location": { "lat": 37.5665, "lng": 126.978 },
-      "products": ["월급"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "products": [
+        "월급"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202604010002,
+      "id": "202604010002",
       "date": "2026-04-01",
       "categoryId": "living",
       "memo": "4월 월세 납부",
       "price": 750000,
       "type": "expense",
       "place": "신촌 오피스텔",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["월세"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "월세"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202604020001,
+      "id": "202604020001",
       "date": "2026-04-02",
       "categoryId": "food",
       "memo": "학교 앞 간단한 점심",
       "price": 9800,
       "type": "expense",
       "place": "연세대학교 학생회관",
-      "location": { "lat": 37.564, "lng": 126.939 },
-      "products": ["김밥", "두유"],
-      "receiptId": null
+      "location": {
+        "lat": 37.564,
+        "lng": 126.939
+      },
+      "products": [
+        "김밥",
+        "두유"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202604020002,
+      "id": "202604020002",
       "date": "2026-04-02",
       "categoryId": "transport",
       "memo": "교통카드 추가 충전",
       "price": 30000,
       "type": "expense",
       "place": "신촌역",
-      "location": { "lat": 37.5551, "lng": 126.9368 },
-      "products": ["티머니 충전"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5551,
+        "lng": 126.9368
+      },
+      "products": [
+        "티머니 충전"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202604030001,
+      "id": "202604030001",
       "date": "2026-04-03",
       "categoryId": "subscription",
       "memo": "넷플릭스 정기결제",
       "price": 17000,
       "type": "expense",
       "place": "Netflix",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["Netflix Premium"],
-      "receiptId": null
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "products": [
+        "Netflix Premium"
+      ],
+      "receiptRef": ""
     },
     {
-      "id": 202604040001,
-      "date": "2026-04-04",
-      "categoryId": "food",
-      "memo": "친구와 저녁 식사",
-      "price": 18400,
-      "type": "expense",
-      "place": "신촌 분식집",
-      "location": { "lat": 37.5561, "lng": 126.9371 },
-      "products": ["떡볶이", "튀김", "음료"],
-      "receiptId": null
-    },
-    {
-      "id": 202604050001,
+      "id": "202604050001",
       "date": "2026-04-05",
       "categoryId": "living",
       "memo": "관리비 일부 납부",
       "price": 42000,
       "type": "expense",
       "place": "오피스텔 관리사무소",
-      "location": { "lat": 37.5598, "lng": 126.9368 },
-      "products": ["관리비"],
-      "receiptId": null
+      "products": [
+        "관리비"
+      ],
+      "location": {
+        "lat": 37.5598,
+        "lng": 126.9368
+      },
+      "receiptRef": ""
     },
     {
-      "id": 202604050002,
+      "type": "expense",
       "date": "2026-04-05",
+      "price": 7000,
       "categoryId": "etc",
       "memo": "축하 카드 구매",
-      "price": 7000,
-      "type": "expense",
-      "place": "아트박스 신촌점",
-      "location": { "lat": 37.5562, "lng": 126.9382 },
-      "products": ["카드"],
-      "receiptId": null
+      "place": "아트박스 신촌점ㅓㅗㅗ",
+      "products": [
+        "카드"
+      ],
+      "location": {
+        "lat": null,
+        "lng": null
+      },
+      "receiptRef": "",
+      "id": "202604050002"
     },
     {
-      "id": 202604060001,
-      "date": "2026-04-06",
-      "categoryId": "shopping",
-      "memo": "손목 보호대 구매",
-      "price": 21000,
       "type": "expense",
-      "place": "올리브영 신촌점",
-      "location": { "lat": 37.5569, "lng": 126.9374 },
-      "products": ["손목 보호대"],
-      "receiptId": 202604060901
+      "date": "2024-05-29",
+      "price": 11500,
+      "categoryId": "food",
+      "memo": "웰하우스에서 Decaf 아메리카노 Ice, 초코 버터바 구매",
+      "place": "웰하우스",
+      "products": [
+        "Decaf 아메리카노 Ice",
+        "초코 버터바"
+      ],
+      "location": {
+        "lat": 37.5108059522713,
+        "lng": 127.108736623837
+      },
+      "receiptRef": 202604127825,
+      "id": 1775996394330
     },
     {
-      "id": 202604060002,
-      "date": "2026-04-06",
+      "date": "2025-04-01",
+      "categoryId": "food",
+      "memo": "강릉시 고고빛집에서 식사",
+      "price": 30000,
+      "type": "expense",
+      "place": "고고빛집",
+      "location": {
+        "lat": "",
+        "lng": ""
+      },
+      "products": [
+        "광어회"
+      ],
+      "receiptRef": 202604128342,
+      "id": 1775996454550
+    },
+    {
+      "date": "2025-05-16",
+      "categoryId": "food",
+      "memo": "조앤글라스에서 클래식 감자튀김 & 케찹, 플레티디 12년 (SHOT) - 위스키, 참이슬 구매",
+      "price": 31900,
+      "type": "expense",
+      "place": "조앤글라스",
+      "location": {
+        "lat": 37.5367403844114,
+        "lng": 127.125974576013
+      },
+      "products": [
+        "클래식 감자튀김 & 케찹",
+        "플레티디 12년 (SHOT) - 위스키",
+        "참이슬"
+      ],
+      "receiptRef": 202604124232,
+      "id": 1775996477863
+    },
+    {
+      "type": "expense",
+      "date": "2025-07-02",
+      "price": 181800,
+      "categoryId": "food",
+      "memo": "분위기 좋은 식당",
+      "place": "놉스 천호점",
+      "products": [
+        "Bread(식전빵)",
+        "T-bone Steak 750g MR",
+        "시그니처 샐러드",
+        "매쉬 포테이토",
+        "들기름 숙성김치",
+        "아라비아따",
+        "204우드브릿지 메를로"
+      ],
+      "location": {
+        "lat": null,
+        "lng": null
+      },
+      "receiptRef": 202604124417,
+      "id": 1775996510878
+    },
+    {
+      "type": "expense",
+      "date": "2026-04-12",
+      "price": 150000,
       "categoryId": "medical",
-      "memo": "병원 진료비",
-      "price": 18000,
-      "type": "expense",
-      "place": "세브란스병원",
-      "location": { "lat": 37.5635, "lng": 126.9392 },
-      "products": ["외래 진료"],
-      "receiptId": null
+      "memo": "배아파서 응급실",
+      "place": "서울대병원",
+      "products": [
+        "진료비"
+      ],
+      "location": {
+        "lat": 37.5795346620418,
+        "lng": 126.99900375369114
+      },
+      "receiptRef": "",
+      "id": 1775996696042
     },
     {
-      "id": 202604070001,
-      "date": "2026-04-07",
+      "type": "expense",
+      "date": "2026-02-06",
+      "price": 6500,
       "categoryId": "food",
-      "memo": "주중 장보기",
-      "price": 41300,
-      "type": "expense",
-      "place": "홈플러스 익스프레스",
-      "location": { "lat": 37.5584, "lng": 126.9362 },
-      "products": ["샐러드", "과일", "요거트"],
-      "receiptId": null
+      "memo": "스타벅스 대전도안DT점에서 크랜베리SW, 따뜻하게 데움 구매",
+      "place": "스타벅스 대전도안DT점",
+      "products": [
+        "크랜베리SW"
+      ],
+      "location": {
+        "lat": 36.35139799040111,
+        "lng": 127.34018681405291
+      },
+      "receiptRef": 202604129712,
+      "id": 1775999308583
     },
     {
-      "id": 202604080001,
-      "date": "2026-04-08",
+      "date": "2026-04-12",
       "categoryId": "food",
-      "memo": "행복한 스타벅스",
-      "price": 12900,
+      "memo": "레드버튼(시네마강남점)에서 아메리카노 (ICE), 뽕따 쉐이크, 복숭아 아이스티, 반반팝콘 (오리지널+카라멜) L, TWG 1837블랙티 (ICE) 구매",
+      "price": 30200,
       "type": "expense",
-      "place": "스타벅스 강남역점",
-      "location": { "lat": 37.4979, "lng": 127.0276 },
-      "products": ["카페라떼", "샌드위치"],
-      "receiptId": 202604080901
-    },
-    {
-      "id": 202604080002,
-      "date": "2026-04-08",
-      "categoryId": "transport",
-      "memo": "늦은 귀가 택시",
-      "price": 14100,
-      "type": "expense",
-      "place": "카카오T",
-      "location": { "lat": 37.5583, "lng": 126.9369 },
-      "products": ["택시"],
-      "receiptId": null
+      "place": "레드버튼(시네마강남점)",
+      "location": {
+        "lat": 37.5003940501115,
+        "lng": 127.026984456104
+      },
+      "products": [
+        "아메리카노 (ICE)",
+        "뽕따 쉐이크",
+        "복숭아 아이스티",
+        "반반팝콘 (오리지널+카라멜) L",
+        "TWG 1837블랙티 (ICE)"
+      ],
+      "receiptRef": 202604121620,
+      "id": 1776001841649
     }
   ],
   "receipts": [
     {
-      "id": 202603240901,
-      "transactionId": 202603240001,
-      "imageUrl": "/uploads/receipt-202603240901.jpg",
-      "ocrRawText": "이마트 신촌점\n우유 1 4200\n계란 1 6900\n샐러드 2 9800\n요거트 4 8200\n기타 식재료 42900\n합계 72000",
-      "createdAt": "2026-03-24T11:30:00.000Z"
+      "id": 202604127825,
+      "transactionRef": 1775996394330,
+      "imageUrl": "/uploads/receipt/202604127825_1775996387829.jpeg",
+      "ocrRawText": "카드결제승인 [월하우스] 306-12-94054 TEL:010-2662-1816 김승현 서울특별시 송파구 오금로16길 10 2층 전부 거래 일시 2024-05-29 17:09:40 상품명 단가 수량 금액 Decaf 아메리카노 5,500 1 5,500 -Ice 0 1 0 초코 버터바 6,000 1 6,000 [결제 내역] 공급가액 10,455원 부가세 1,045원 결제금액 11,500원",
+      "createdAt": "2026-04-12T21:19:54.343+09:00"
     },
     {
-      "id": 202604060901,
-      "transactionId": 202604060001,
-      "imageUrl": "/uploads/receipt-202604060901.jpg",
-      "ocrRawText": "올리브영 신촌점\n손목 보호대 1 21000\n합계 21000",
-      "createdAt": "2026-04-06T14:12:00.000Z"
+      "id": 202604128342,
+      "transactionRef": 1775996454550,
+      "imageUrl": "/uploads/receipt/202604128342_1775996438346.jpeg",
+      "ocrRawText": "O2CHECK\n신용승인\n고고빛집\n주소:강원도 강릉시 금성로 21 지하1층 9호\n금액: 27,273원\n부가세: 2,727원\n합계: 30,000원",
+      "createdAt": "2026-04-12T21:20:54.562+09:00"
     },
     {
-      "id": 202604080901,
-      "transactionId": 202604080001,
-      "imageUrl": "/uploads/receipt-202604080901.jpg",
-      "ocrRawText": "스타벅스 강남역점\n카페라떼 1 6500\n샌드위치 1 6400\n합계 12900",
-      "createdAt": "2026-04-08T10:00:00.000Z"
+      "id": 202604124232,
+      "transactionRef": 1775996477863,
+      "imageUrl": "/uploads/receipt/202604124232_1775996464236.jpeg",
+      "ocrRawText": "영수증\n[매장명] 조앤글라스\n[사업자] 648-66-00526\n[주소] 서울특별시 강동구 천호옛길 90, 2층(성내동)\n[대표자] 조재현 [TEL] 02-6349-7779\n[매출일] 2025-05-16 22:45:44\n[테이블] 기본/12\n\n메뉴 수량 가격\n클래식 감자튀김 & 케찹 1 8,400\n플레티디 12년 (SHOT) - 위스키 2 18,000\n - 잔: 온더락\n참이슬 1 5,500\n\n합계 31,900\n\n공급가액 29,000\n부가세 2,900\n합계금액 31,900\n\n카드 31,900",
+      "createdAt": "2026-04-12T21:21:17.878+09:00"
+    },
+    {
+      "id": 202604124417,
+      "transactionRef": 1775996510878,
+      "imageUrl": "/uploads/receipt/202604124417_1775996484421.jpeg",
+      "ocrRawText": "눕스 천호점\n550-85-02456 TEL: 02)1234-5678 최채환\n서울 강동구 천호대로 1024 힐스테이트 천호역 젠트리스, 지1층 B101 호\n테이블 : [눕스 천호점] 테이블 14\n2025-07-02 18:27(수) POS:01 BILL:000007\n상품명 수량 할인 금액\n000131 Bread(식전빵) 1개 0 0\n000029 T-bone Steak 750g 1개 0 138,000\n000110 > MR 1개 0 0\n000011 > 시그니처 샐러드 1개 0 1,000\n000059 > 매쉬 포테이토 1개 0 0\n000060 > 들기름 숙성김치 1개 0 0\n000037 아라비아따 1개 0 15,900\n000316 204우드브릿지 메를로 1개 0 26,900\n000325 직원호출 1개 0 0\n부가세 과세 물품가액 : 165,274\n부 가 세 : 16,526\n합 계 : 181,800\n받 을 금 액 : 181,800\n받 은 금 액 : 181,800",
+      "createdAt": "2026-04-12T21:21:50.890+09:00"
+    },
+    {
+      "id": 202604129712,
+      "transactionRef": 1775999308583,
+      "imageUrl": "/uploads/receipt/202604129712_1775999279715.jpeg",
+      "ocrRawText": "STARBUCKS\n현금(소득공제) 사이렌오더\n대전도안DT점\n대전 유성구 도안대로573\n대표: 손정현\n[매장#3343, POS 01] 2026-04-11 08:16:38\n찌오니 (A-07)\n크랜베리SW 6,500 1 6,500\nㄴ따뜻하게 데움 0 1 0\n합계 6,500\n결제금액 6,500\n결제 6,500\n주문번호 32604110816360678440\n스타벅스카드 400\n스타벅스카드 6,100 \n■스타벅스 리워드 (WLDNJS11**)\n*Gold 등급(~2026/07/23 까지 유지)\n*방문별:1 만원별:0 이벤트별:0 에코별:0 적립\n*쿠폰/별 상세내역은 앱에서 확인해 주세요.\n현금영수증발급 010-****-7465\n승인금액 6,500\n승인번호 177788602\n현금영수증 문의: 126 - 1 - 1\n결제수단 변경은 구입하신 매장에서 가능하며, 반드시 구매 영수증과 원거래 결제수단(카드/단말기)을 지참하셔야 합니다.\n(변경 가능 기간: ~ 2026-04-25)\nwww.starbucks.co.kr\nWi-fi SSID: KT_starbucks\n비밀번호: 없음\n가입된 통신사에 관계없이 전고객 사용가능\nKT의 고객은 약관동의 및 인증 후 사용가능",
+      "createdAt": "2026-04-12T22:08:28.603+09:00"
+    },
+    {
+      "id": 202604121620,
+      "transactionRef": 1776001841649,
+      "imageUrl": "/uploads/receipt/202604121620_1776001821632.jpeg",
+      "ocrRawText": "[ 카드판매 영수증 ] [고객용] 레드버튼(시네마강남점) 사업자번호 : 735-81-03397 대표자 : 김영수 TEL: 02-556-3799 서울특별시 강남구 강남대로 442 4층, 5층 테이블명: 62번-F2 (5인) 판매시가: 2025-03-02 12:32:20 (POS100) 판매사원: 상품 단가 수량 금액 *아메리카노 (ICE) 4,300 2 8,600 - *선택:연하게 2 (0) *뽕따 쉐이크 5,500 1 5,500 *복숭아 아이스티 4,000 1 4,000 *반반팝콘 (오리지널+카라멜) L 7,000 1 7,000 *TWG 1837블랙티 (ICE) 5,100 1 5,100 합 계 :: 30,200 카드: 30,200 공급 가:: 27,454 부 가 세:: 2,746",
+      "createdAt": "2026-04-12T22:50:41.667+09:00"
     }
   ],
-  "receiptDraft": {
-    "id": 202604090901,
-    "imageUrl": "/uploads/receipt-draft-202604090901.jpg",
-    "status": "reviewing",
-    "ocrRawText": "GS25 신촌역점\n삼각김밥 1 1800\n탄산수 1 1600\n초콜릿 1 2000\n합계 5400",
-    "aiResult": {
-      "date": "2026-04-09",
-      "categoryId": "food",
-      "memo": "편의점에서 간식과 음료 구매",
-      "price": 5400,
-      "type": "expense",
-      "place": "GS25 신촌역점",
-      "location": { "lat": 37.5551, "lng": 126.9368 },
-      "products": ["삼각김밥", "탄산수", "초콜릿"]
-    }
-  },
+  "receiptDraft": {},
   "dailyCashflow": [
     {
       "date": "2026-02-01",
       "yearMonth": "2026-02",
       "totalSpend": 750000,
       "totalIncome": 3000000,
-      "totalCashflow": 2250000
+      "totalCashflow": 2250000,
+      "id": "eSrbEpAudGQ"
     },
     {
       "date": "2026-02-03",
       "yearMonth": "2026-02",
       "totalSpend": 17000,
       "totalIncome": 0,
-      "totalCashflow": -17000
+      "totalCashflow": -17000,
+      "id": "K5LPRUV-WAw"
     },
     {
       "date": "2026-02-05",
       "yearMonth": "2026-02",
       "totalSpend": 14500,
       "totalIncome": 0,
-      "totalCashflow": -14500
+      "totalCashflow": -14500,
+      "id": "ZWLfA3vNdxY"
     },
     {
       "date": "2026-02-06",
       "yearMonth": "2026-02",
       "totalSpend": 89000,
       "totalIncome": 0,
-      "totalCashflow": -89000
+      "totalCashflow": -89000,
+      "id": "mO9v1hWmjOU"
     },
     {
       "date": "2026-02-07",
       "yearMonth": "2026-02",
       "totalSpend": 55000,
       "totalIncome": 0,
-      "totalCashflow": -55000
+      "totalCashflow": -55000,
+      "id": "HH0tuiIVjdk"
     },
     {
       "date": "2026-02-11",
       "yearMonth": "2026-02",
       "totalSpend": 58000,
       "totalIncome": 0,
-      "totalCashflow": -58000
+      "totalCashflow": -58000,
+      "id": "YjMAvoINKZU"
     },
     {
       "date": "2026-02-13",
       "yearMonth": "2026-02",
       "totalSpend": 22000,
       "totalIncome": 0,
-      "totalCashflow": -22000
+      "totalCashflow": -22000,
+      "id": "wZv2Z8eg1n4"
     },
     {
       "date": "2026-02-14",
       "yearMonth": "2026-02",
       "totalSpend": 14900,
       "totalIncome": 0,
-      "totalCashflow": -14900
+      "totalCashflow": -14900,
+      "id": "PBIAkHAb-fA"
     },
     {
       "date": "2026-02-18",
       "yearMonth": "2026-02",
       "totalSpend": 12400,
       "totalIncome": 0,
-      "totalCashflow": -12400
+      "totalCashflow": -12400,
+      "id": "iwyKwJ55JoQ"
     },
     {
       "date": "2026-02-20",
       "yearMonth": "2026-02",
       "totalSpend": 68000,
       "totalIncome": 0,
-      "totalCashflow": -68000
+      "totalCashflow": -68000,
+      "id": "7baWUFmUrGw"
     },
     {
       "date": "2026-02-21",
       "yearMonth": "2026-02",
       "totalSpend": 18200,
       "totalIncome": 0,
-      "totalCashflow": -18200
+      "totalCashflow": -18200,
+      "id": "QjRHDYXS73w"
     },
     {
       "date": "2026-02-22",
       "yearMonth": "2026-02",
       "totalSpend": 129000,
       "totalIncome": 0,
-      "totalCashflow": -129000
+      "totalCashflow": -129000,
+      "id": "ITdNMKDGVq8"
     },
     {
       "date": "2026-02-25",
       "yearMonth": "2026-02",
       "totalSpend": 35000,
       "totalIncome": 0,
-      "totalCashflow": -35000
+      "totalCashflow": -35000,
+      "id": "rSeXXvYxDLM"
     },
     {
       "date": "2026-02-28",
       "yearMonth": "2026-02",
       "totalSpend": 6900,
       "totalIncome": 0,
-      "totalCashflow": -6900
+      "totalCashflow": -6900,
+      "id": "TDNABn4542Q"
     },
     {
       "date": "2026-03-01",
       "yearMonth": "2026-03",
       "totalSpend": 750000,
       "totalIncome": 3000000,
-      "totalCashflow": 2250000
+      "totalCashflow": 2250000,
+      "id": "HwVqs0mec94"
     },
     {
       "date": "2026-03-03",
       "yearMonth": "2026-03",
       "totalSpend": 17000,
       "totalIncome": 0,
-      "totalCashflow": -17000
+      "totalCashflow": -17000,
+      "id": "UGPQWi9KHy4"
     },
     {
       "date": "2026-03-04",
       "yearMonth": "2026-03",
       "totalSpend": 9800,
       "totalIncome": 0,
-      "totalCashflow": -9800
+      "totalCashflow": -9800,
+      "id": "mFEGlkQXyQU"
     },
     {
       "date": "2026-03-06",
       "yearMonth": "2026-03",
       "totalSpend": 97000,
       "totalIncome": 0,
-      "totalCashflow": -97000
+      "totalCashflow": -97000,
+      "id": "FEUl7RSdzW8"
     },
     {
       "date": "2026-03-07",
       "yearMonth": "2026-03",
       "totalSpend": 55000,
       "totalIncome": 0,
-      "totalCashflow": -55000
+      "totalCashflow": -55000,
+      "id": "z5S7-cYWmHo"
     },
     {
       "date": "2026-03-08",
       "yearMonth": "2026-03",
       "totalSpend": 42000,
       "totalIncome": 0,
-      "totalCashflow": -42000
+      "totalCashflow": -42000,
+      "id": "en4uVo6EPMU"
     },
     {
       "date": "2026-03-10",
       "yearMonth": "2026-03",
       "totalSpend": 25000,
       "totalIncome": 0,
-      "totalCashflow": -25000
+      "totalCashflow": -25000,
+      "id": "XhojGjRHyY0"
     },
     {
       "date": "2026-03-12",
       "yearMonth": "2026-03",
       "totalSpend": 18500,
       "totalIncome": 0,
-      "totalCashflow": -18500
+      "totalCashflow": -18500,
+      "id": "-_zv-JxBoEI"
     },
     {
       "date": "2026-03-14",
       "yearMonth": "2026-03",
       "totalSpend": 10900,
       "totalIncome": 0,
-      "totalCashflow": -10900
+      "totalCashflow": -10900,
+      "id": "MGKEDXO00Qw"
     },
     {
       "date": "2026-03-15",
       "yearMonth": "2026-03",
       "totalSpend": 32000,
       "totalIncome": 0,
-      "totalCashflow": -32000
+      "totalCashflow": -32000,
+      "id": "W111ev4dtTM"
     },
     {
       "date": "2026-03-17",
       "yearMonth": "2026-03",
       "totalSpend": 27900,
       "totalIncome": 0,
-      "totalCashflow": -27900
+      "totalCashflow": -27900,
+      "id": "XwyCt9BJbO8"
     },
     {
       "date": "2026-03-19",
       "yearMonth": "2026-03",
       "totalSpend": 158000,
       "totalIncome": 0,
-      "totalCashflow": -158000
+      "totalCashflow": -158000,
+      "id": "xe7sg8aVMV4"
     },
     {
       "date": "2026-03-20",
       "yearMonth": "2026-03",
       "totalSpend": 28000,
       "totalIncome": 0,
-      "totalCashflow": -28000
+      "totalCashflow": -28000,
+      "id": "FflEZDixRrU"
     },
     {
       "date": "2026-03-21",
       "yearMonth": "2026-03",
       "totalSpend": 4900,
       "totalIncome": 0,
-      "totalCashflow": -4900
+      "totalCashflow": -4900,
+      "id": "6af8fLg5TQM"
     },
     {
       "date": "2026-03-24",
       "yearMonth": "2026-03",
       "totalSpend": 72000,
       "totalIncome": 0,
-      "totalCashflow": -72000
+      "totalCashflow": -72000,
+      "id": "0YY7-0gyckY"
     },
     {
       "date": "2026-03-25",
       "yearMonth": "2026-03",
       "totalSpend": 45800,
       "totalIncome": 0,
-      "totalCashflow": -45800
+      "totalCashflow": -45800,
+      "id": "obdFfmupIHo"
     },
     {
       "date": "2026-03-27",
       "yearMonth": "2026-03",
       "totalSpend": 38000,
       "totalIncome": 0,
-      "totalCashflow": -38000
+      "totalCashflow": -38000,
+      "id": "uoa7JMEyORs"
     },
     {
       "date": "2026-03-29",
       "yearMonth": "2026-03",
       "totalSpend": 16500,
       "totalIncome": 0,
-      "totalCashflow": -16500
+      "totalCashflow": -16500,
+      "id": "9gHkeyiED1E"
     },
     {
       "date": "2026-03-30",
       "yearMonth": "2026-03",
       "totalSpend": 8300,
       "totalIncome": 0,
-      "totalCashflow": -8300
+      "totalCashflow": -8300,
+      "id": "HxUTGdLjFtk"
     },
     {
       "date": "2026-04-01",
       "yearMonth": "2026-04",
       "totalSpend": 750000,
       "totalIncome": 3000000,
-      "totalCashflow": 2250000
+      "totalCashflow": 2250000,
+      "id": "kElXSoET5-o"
     },
     {
       "date": "2026-04-02",
       "yearMonth": "2026-04",
       "totalSpend": 39800,
       "totalIncome": 0,
-      "totalCashflow": -39800
+      "totalCashflow": -39800,
+      "id": "P0aoRSPSuyY"
     },
     {
       "date": "2026-04-03",
       "yearMonth": "2026-04",
       "totalSpend": 17000,
       "totalIncome": 0,
-      "totalCashflow": -17000
+      "totalCashflow": -17000,
+      "id": "CbYm_xV4hNo"
     },
     {
       "date": "2026-04-04",
       "yearMonth": "2026-04",
       "totalSpend": 18400,
       "totalIncome": 0,
-      "totalCashflow": -18400
+      "totalCashflow": -18400,
+      "id": "0hZ7LMFMaNA"
     },
     {
       "date": "2026-04-05",
       "yearMonth": "2026-04",
       "totalSpend": 49000,
       "totalIncome": 0,
-      "totalCashflow": -49000
+      "totalCashflow": -49000,
+      "id": "dEdZHgoFp4E"
     },
     {
       "date": "2026-04-06",
       "yearMonth": "2026-04",
       "totalSpend": 39000,
       "totalIncome": 0,
-      "totalCashflow": -39000
+      "totalCashflow": -39000,
+      "id": "o_Le2DuwQnI"
     },
     {
       "date": "2026-04-07",
       "yearMonth": "2026-04",
       "totalSpend": 41300,
       "totalIncome": 0,
-      "totalCashflow": -41300
+      "totalCashflow": -41300,
+      "id": "OR2n5c9iuSI"
     },
     {
       "date": "2026-04-08",
       "yearMonth": "2026-04",
       "totalSpend": 27000,
       "totalIncome": 0,
-      "totalCashflow": -27000
+      "totalCashflow": -27000,
+      "id": "ee6xLd4PJkM"
     }
   ],
   "monthlyCashflow": [
@@ -990,19 +1310,47 @@
       "incomeTransactionCount": 1,
       "aiSummary": "2월은 월세와 공과금 비중이 높았고, 쇼핑 지출이 더해지며 총지출이 128만 원대로 마감되었습니다.",
       "spendingAnalysis": [
-        { "categoryId": "income", "totalAmount": 3000000 },
-        { "categoryId": "living", "totalAmount": 839000, "percentage": 65.04 },
+        {
+          "categoryId": "income",
+          "totalAmount": 3000000
+        },
+        {
+          "categoryId": "living",
+          "totalAmount": 839000,
+          "percentage": 65.04
+        },
         {
           "categoryId": "subscription",
           "totalAmount": 31900,
           "percentage": 2.47
         },
-        { "categoryId": "shopping", "totalAmount": 187000, "percentage": 14.5 },
-        { "categoryId": "food", "totalAmount": 111400, "percentage": 8.64 },
-        { "categoryId": "transport", "totalAmount": 73200, "percentage": 5.67 },
-        { "categoryId": "medical", "totalAmount": 12400, "percentage": 0.96 },
-        { "categoryId": "etc", "totalAmount": 35000, "percentage": 2.71 }
-      ]
+        {
+          "categoryId": "shopping",
+          "totalAmount": 187000,
+          "percentage": 14.5
+        },
+        {
+          "categoryId": "food",
+          "totalAmount": 111400,
+          "percentage": 8.64
+        },
+        {
+          "categoryId": "transport",
+          "totalAmount": 73200,
+          "percentage": 5.67
+        },
+        {
+          "categoryId": "medical",
+          "totalAmount": 12400,
+          "percentage": 0.96
+        },
+        {
+          "categoryId": "etc",
+          "totalAmount": 35000,
+          "percentage": 2.71
+        }
+      ],
+      "id": "aYFMZV3_7h0"
     },
     {
       "yearMonth": "2026-03",
@@ -1016,8 +1364,15 @@
       "incomeTransactionCount": 1,
       "aiSummary": "3월은 생활비 수준은 비슷했지만 쇼핑과 식비가 함께 늘어나 2월보다 지출이 소폭 증가했습니다.",
       "spendingAnalysis": [
-        { "categoryId": "income", "totalAmount": 3000000 },
-        { "categoryId": "living", "totalAmount": 847000, "percentage": 58.15 },
+        {
+          "categoryId": "income",
+          "totalAmount": 3000000
+        },
+        {
+          "categoryId": "living",
+          "totalAmount": 847000,
+          "percentage": 58.15
+        },
         {
           "categoryId": "subscription",
           "totalAmount": 32800,
@@ -1028,15 +1383,28 @@
           "totalAmount": 238000,
           "percentage": 16.34
         },
-        { "categoryId": "food", "totalAmount": 144700, "percentage": 9.93 },
+        {
+          "categoryId": "food",
+          "totalAmount": 144700,
+          "percentage": 9.93
+        },
         {
           "categoryId": "transport",
           "totalAmount": 100800,
           "percentage": 6.92
         },
-        { "categoryId": "medical", "totalAmount": 60000, "percentage": 4.12 },
-        { "categoryId": "etc", "totalAmount": 33300, "percentage": 2.29 }
-      ]
+        {
+          "categoryId": "medical",
+          "totalAmount": 60000,
+          "percentage": 4.12
+        },
+        {
+          "categoryId": "etc",
+          "totalAmount": 33300,
+          "percentage": 2.29
+        }
+      ],
+      "id": "_bI7PwCDwS0"
     },
     {
       "yearMonth": "2026-04",
@@ -1050,19 +1418,48 @@
       "incomeTransactionCount": 1,
       "aiSummary": "4월은 8일까지의 부분 집계이며 월세 납부 영향으로 생활비 비중이 매우 높게 나타납니다.",
       "spendingAnalysis": [
-        { "categoryId": "income", "totalAmount": 3000000 },
-        { "categoryId": "living", "totalAmount": 792000, "percentage": 80.69 },
+        {
+          "categoryId": "income",
+          "totalAmount": 3000000
+        },
+        {
+          "categoryId": "living",
+          "totalAmount": 792000,
+          "percentage": 80.69
+        },
         {
           "categoryId": "subscription",
           "totalAmount": 17000,
           "percentage": 1.73
         },
-        { "categoryId": "shopping", "totalAmount": 21000, "percentage": 2.14 },
-        { "categoryId": "food", "totalAmount": 82400, "percentage": 8.4 },
-        { "categoryId": "transport", "totalAmount": 44100, "percentage": 4.49 },
-        { "categoryId": "medical", "totalAmount": 18000, "percentage": 1.83 },
-        { "categoryId": "etc", "totalAmount": 7000, "percentage": 0.71 }
-      ]
+        {
+          "categoryId": "shopping",
+          "totalAmount": 21000,
+          "percentage": 2.14
+        },
+        {
+          "categoryId": "food",
+          "totalAmount": 82400,
+          "percentage": 8.4
+        },
+        {
+          "categoryId": "transport",
+          "totalAmount": 44100,
+          "percentage": 4.49
+        },
+        {
+          "categoryId": "medical",
+          "totalAmount": 18000,
+          "percentage": 1.83
+        },
+        {
+          "categoryId": "etc",
+          "totalAmount": 7000,
+          "percentage": 0.71
+        }
+      ],
+      "id": "SyH49NKOGSY"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

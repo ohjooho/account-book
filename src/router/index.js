@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import NotFoundView from '@/views/NotFoundView.vue';
 
 const routes = [
   {
@@ -66,6 +67,12 @@ const routes = [
     path: '/map',
     name: 'map',
     component: () => import('@/views/MapView.vue'),
+  },
+  {
+    // 라우팅 되지 않은 페이지
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: NotFoundView,
   },
 ];
 
